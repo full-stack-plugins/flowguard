@@ -30,23 +30,37 @@ pub fn assess(
     provider: &impl ApprovalProvider,
     request: &ApprovalRequest,
 ) -> Result<ActionAssessment, ProviderError> {
-    use ActionAssessment::*;
+    let requirement = requirements(action, policy);
+    if requirement != ActionAssessment::ApprovalMissing {
+        return Ok(requirement);
+    }
+    if policy.required_stages.is_empty()
+        || policy.required_stages.len() > 64
+        || policy
+            .required_stages
+            .iter()
+            .any(|s| s.trim().is_empty() || s.len() > 256)
+        || request.action != "write-tests"
+    {
+        return Err(ProviderError::InvalidRecord);
+    }
+    Ok(if observe(provider, request)?.is_some() {
+        ActionAssessment::ScopedRepairEligible
+    } else {
+        ActionAssessment::ApprovalMissing
+    })
+}
+// Both legacy descriptive assessment and protected receipt use one action
+// classification. Only the protected API freezes concrete applicability/paths.
+pub(crate) fn requirements(action: Action, policy: &ActionPolicy) -> ActionAssessment {
     match action {
-        Action::Read | Action::Clarify => Ok(ReadOnly),
-        Action::Deliver => Ok(DeliveryGateRequired),
-        Action::Skip => Ok(ProtectedSkipGateRequired),
-        Action::WriteTests => {
-            if !policy.allow_test_repair {
-                return Ok(RepairNotApplicable);
-            }
-            if request.action != "write-tests" {
-                return Err(ProviderError::InvalidRecord);
-            }
-            Ok(if observe(provider, request)?.is_some() {
-                ScopedRepairEligible
-            } else {
-                ApprovalMissing
-            })
-        }
+        Action::Read | Action::Clarify => ActionAssessment::ReadOnly,
+        Action::Deliver => ActionAssessment::DeliveryGateRequired,
+        Action::Skip => ActionAssessment::ProtectedSkipGateRequired,
+        Action::WriteTests if policy.allow_test_repair => ActionAssessment::ApprovalMissing,
+        Action::WriteTests => ActionAssessment::RepairNotApplicable,
     }
 }
+
+mod repair;
+pub use repair::{ProtectedRepairPlan, RepairContext, RepairError, RepairReceipt, RepairRequest};

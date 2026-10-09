@@ -121,6 +121,11 @@ fn read(root: &AllowedRoot, path: &str, total: &mut usize) -> Result<Vec<u8>, ()
     }
     Ok(bytes)
 }
+fn present_string<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error> {
+    String::deserialize(deserializer).map(Some)
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct GateInput {
@@ -129,6 +134,10 @@ struct GateInput {
     candidate: String,
     frozen: String,
     frozen_digest: String,
+    #[serde(default, deserialize_with = "present_string")]
+    sources: Option<String>,
+    #[serde(default, deserialize_with = "present_string")]
+    sources_digest: Option<String>,
     action: String,
     started_at: String,
     finished_at: String,
@@ -215,6 +224,7 @@ fn gate(args: &[String]) -> Result<CliOutput, ()> {
     }
     let input: GateInput = serde_json::from_slice(&bytes).map_err(|_| ())?;
     if input.version != "flowguard.cli-request/v1alpha1"
+        || input.sources.is_some() != input.sources_digest.is_some()
         || input.specialists.len() > 64
         || input.invocation.repo_candidates.len() != 1
         || input.started_at.len() != 20
@@ -239,6 +249,18 @@ fn gate(args: &[String]) -> Result<CliOutput, ()> {
     if frozen.digest() != input.frozen_digest {
         return Err(());
     }
+    let sources = match (&input.sources, &input.sources_digest) {
+        (None, None) => None,
+        (Some(path), Some(digest)) => Some(
+            crate::evidence::ScopedSources::from_json(
+                &pinned(&root, path, digest, &mut budget)?,
+                &binding,
+                &frozen,
+            )
+            .map_err(|_| ())?,
+        ),
+        _ => return Err(()),
+    };
     let mut configs = BTreeMap::new();
     for config in &input.specialists {
         if configs.insert(config.scope.clone(), config).is_some() {
@@ -252,10 +274,13 @@ fn gate(args: &[String]) -> Result<CliOutput, ()> {
     for obligation in frozen.obligations() {
         let scope = obligation_scope(obligation);
         let config = configs.get(&scope).ok_or(())?;
+        let expected =
+            crate::guard_adapters::expected_binding(binding.binding(), sources.as_ref(), &scope)
+                .map_err(|_| ())?;
         policies.insert(
             scope,
             EligibilityPolicy {
-                binding: binding.binding().clone(),
+                binding: expected,
                 producer: config.producer.clone(),
                 required_scopes: obligation.coverage.iter().cloned().collect(),
                 contract_digest: obligation.rules_digest.clone(),
@@ -265,30 +290,25 @@ fn gate(args: &[String]) -> Result<CliOutput, ()> {
             },
         );
     }
-    // Validate both controller-supplied timestamps before establishing the actual attempt.
-    prepare_gate(
-        &binding,
-        &frozen,
-        policies.clone(),
-        GateRequest {
-            run_id: o.get("--run-id")?.into(),
+    // One preparation path preserves the exact pinned profile for timestamp checks,
+    // normal evaluation, cancellation and bound-error fallback alike.
+    let run_id = o.get("--run-id")?;
+    let prepare = |started_at: &str| {
+        let request = GateRequest {
+            run_id: run_id.into(),
             action: input.action.clone(),
-            started_at: input.finished_at.clone(),
-        },
-    )
-    .map_err(|_| ())?;
-    let fallback_policies = policies.clone();
-    let pending = prepare_gate(
-        &binding,
-        &frozen,
-        policies,
-        GateRequest {
-            run_id: o.get("--run-id")?.into(),
-            action: input.action.clone(),
-            started_at: input.started_at.clone(),
-        },
-    )
-    .map_err(|_| ())?;
+            started_at: started_at.into(),
+        };
+        match &sources {
+            Some(sources) => {
+                prepare_scoped_gate(&binding, &frozen, sources, policies.clone(), request)
+            }
+            None => prepare_gate(&binding, &frozen, policies.clone(), request),
+        }
+    };
+    // Validate both controller-supplied timestamps before establishing the attempt.
+    prepare(&input.finished_at).map_err(|_| ())?;
+    let pending = prepare(&input.started_at).map_err(|_| ())?;
     if o.flags.contains("--cancel") {
         return gate_json(pending.cancel(&input.finished_at).map_err(|_| ())?, fixture);
     }
@@ -349,17 +369,7 @@ fn gate(args: &[String]) -> Result<CliOutput, ()> {
         .or_else(|_| {
             // The same already-resolved immutable inputs support bound transport even
             // if the evaluator rejects its final encoding/verification output.
-            prepare_gate(
-                &binding,
-                &frozen,
-                fallback_policies,
-                GateRequest {
-                    run_id: o.get("--run-id").expect("validated option").into(),
-                    action: input.action.clone(),
-                    started_at: input.started_at.clone(),
-                },
-            )?
-            .input_failed(&input.finished_at)
+            prepare(&input.started_at)?.input_failed(&input.finished_at)
         })
         .map_err(|_| ())?;
     gate_json(run, fixture)

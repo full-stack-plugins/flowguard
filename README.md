@@ -56,6 +56,14 @@ target/debug/flowguard gate check --repo /absolute/git-worktree --input-root /ab
 
 Use coordinated sibling GuardEngine/GitGuard/SpecGuard sources. Replace the example paths and digest with real bound inputs; see the [CLI contract and request format](docs/adr/cli-contract.md). Gate outputs its own ALLOW/BLOCK/REQUIRE_APPROVAL as exits `0`/`2`/`3`; errors and requested cancellation use `4`, with empty stdout before binding and null decision after binding. Other commands have their own documented exit semantics. `--report` is rejected; `--report-file` is an evidence input only. No task-ID inference or execution command is implemented. CodeGuard native exits remain command-specific and unchanged: native aggregate `3` must never be interpreted as FlowGuard REQUIRE_APPROVAL.
 
+### Run the actual five-provider local CLI example
+
+```sh
+python3 examples/cli-five-guards/run.py --flowguard target/debug/flowguard --output /tmp/flowguard-five-guards-demo
+```
+
+Build the binary as above and choose a new output directory. This runs the existing `gate check` on real Git and unchanged SG/AG/CG/TG/GG artifacts, using explicitly enabled local fixture authority. It demonstrates ALLOW, missing evidence, revoked approval, expired baseline and a controller-selected candidate mismatch; saves independently replayable commands and raw outputs; and never grants execution. The optional paired `sources`/`sources_digest` request fields load a pinned scoped-source profile; omission retains legacy behavior. See the [example and exact limits](examples/cli-five-guards/README.md).
+
 ## Design and implementation path
 
 Read the [architecture](docs/architecture.md), [technical design and acceptance plan](docs/technical-design.md), and [draft integration contract](docs/integration-contract.md). Start with a pinned legacy-source inventory and differential fixtures, then implement stage resolution, approval/evidence validation, concurrency control, and protected-host verification. Each phase requires observable negative cases before authority can transfer. No external side effects are enabled by this documentation.

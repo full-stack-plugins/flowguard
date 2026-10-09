@@ -164,3 +164,11 @@ Root accepted fixed FlowGuard `4ea60d8d8618c62f1f3fe990ae4236b07c6943f1` after 3
 ## Independently accepted 5.3 — 2026-10-09
 
 Root and independent reviewer accepted fixed `56a2c9576caf382a6bb5f716c707c77c94606599` after 14 fixed-source related tests (host 5, CLI 8, scoped CLI 1 containing 13 scenarios) and static review without blockers. The first local read-only stdio MCP profile defines authentication/tenant boundaries, key idempotency, boundary cancellation and the decision not to expose HTTP. Actual installed Python MCP SDK 1.29.0 is tested. This does not certify hosted UI/hooks, remote or multi-tenant authentication, asynchronous cancellation, or execution authority. FlowGuard: 25/30 tasks accepted.
+
+## Independently accepted 4.4 / 5.5 — 2026-10-09
+
+Task 4.4 is accepted at `045987c9634af7b9e1b1b1011f30c9e9bf54b9f6`: audit 6 + DAG 5 + release 3 fixed-source tests and static review validate generic CallerPort, tenant roles, minimized audit, owned-artifact retention and current GE approval/publication refresh. Production identity/durable database deployment is not an added prerequisite for this bounded port task.
+
+Task 5.5 is accepted from fixed joint capture `1fd70a11ac0e874ca1bf21801987320c237647de` plus same-domain drift correction `7b3c3f498dd8c83797a918c0d50f3bcf199ba36f`. Independent replay covers four fresh five-producer groups, nine CLI cases, shared project invalidation and old M1 completion refusal; root verified 304 original producer artifacts and 18 CLI output hashes. The correction was independently replayed against a separate copy without rerunning native groups: only SG contract_digest or analyzerVersion changes within the same descriptor domain, with all other fields and original artifacts unchanged. See `tests/acceptance/joint-gates.md` for exact commands, pins and limitations.
+
+Producers run sequentially while A/B store reservations coexist. Shared project tracking is not an accepted-stage approval. Descriptor drift does not run another analyzer implementation. Native CG parity is confined to the exact fixed Ruff/native/sidecar fixture and preserves native schema 0.13.0 / exit 3 / raw output bytes. FlowGuard: **27/30 accepted**; 4.5 authenticated controller events, 5.4 real protected host and 5.6 adjudicated rule-owner rollout remain incomplete.

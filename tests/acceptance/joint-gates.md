@@ -1,6 +1,6 @@
 # Joint local five-producer acceptance
 
-The original task 5.5 remains unchecked until independent acceptance. This slice
+Task 5.5 is independently accepted for the bounded local profile below. This slice
 builds fresh actual SG/AG/CG/TG/GG artifacts for A, B, M1 and M2. It does not edit
 or relabel the earlier approval-bridge corpus. The fixture is controlled local
 execution with fixture authority, not authenticated production CI or a hosted
@@ -89,3 +89,26 @@ Rust source/Cargo file hashes before and after building with GE b0e4b445, SG
 8fc3f9b0, AG d6c8235d and GG f6c7368c. TG helper source 2d2189f is unchanged in
 current a61975c for src/Cargo files. Independent reviewers supply their archived
 source pins alongside the generated per-file and executable hashes.
+
+
+## Independent acceptance
+
+Root independently executed fixed `1fd70a11ac0e874ca1bf21801987320c237647de`:
+four fresh groups of five actual producers, nine CLI cases and same-store shared
+project invalidation/late completion passed. The review verified 304 original
+producer artifacts, 18 CLI stdout/stderr hashes, and 366 source/Cargo files against
+fixed source pins. Evidence is retained in the ledger
+`flowguard-joint-independent-capture/result.json` and
+`independent-source-and-artifact-verification.json`.
+
+Author self-review then found that the initial drift inputs used different
+serialization domains. Fixed `7b3c3f498dd8c83797a918c0d50f3bcf199ba36f` corrects
+that comparison to identical policy maps / producer tuple lists. Root independently
+copied the original capture and replayed only its consumer: nine CLI cases and all
+same-store checks passed; restoring the one changed field reproduces each entire
+original descriptor, and all 304 original producer artifacts remain unchanged.
+Evidence: ledger `flowguard-joint-drift-independent-run.json`. Native producer groups
+were not rerun for this narrow correction. This combined fixed evidence accepts
+the original local 5.5 scenarios without adding accepted-stage inheritance, a
+second analyzer implementation, production authentication, or other native CG
+fixture versions to its claim.

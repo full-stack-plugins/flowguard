@@ -1,0 +1,253 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "store_id",
+    "events",
+    "checksum"
+  ],
+  "properties": {
+    "api_version": {
+      "const": "flowguard.attempt-log/v1alpha1"
+    },
+    "store_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "work",
+              "expected"
+            ],
+            "properties": {
+              "kind": {
+                "const": "Advance"
+              },
+              "work": {
+                "$ref": "#/$defs/work"
+              },
+              "expected": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "work",
+              "key",
+              "generation"
+            ],
+            "properties": {
+              "kind": {
+                "const": "Reserve"
+              },
+              "work": {
+                "$ref": "#/$defs/work"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "run_id",
+              "envelope"
+            ],
+            "properties": {
+              "kind": {
+                "const": "Append"
+              },
+              "run_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "envelope": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "run_id",
+              "expected"
+            ],
+            "properties": {
+              "kind": {
+                "const": "Publish"
+              },
+              "run_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "expected": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              }
+            }
+          }
+        ]
+      }
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowguard.local/schemas/attempt-log-v1alpha1",
+  "$defs": {
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target",
+        "digest",
+        "run_id",
+        "binding",
+        "required"
+      ],
+      "properties": {
+        "target": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repoId",
+            "taskId",
+            "worktreeId",
+            "requirementIds",
+            "candidateOid",
+            "baseOid",
+            "mergeGroupId",
+            "sourceSnapshotDigest",
+            "baselineDigest"
+          ],
+          "properties": {
+            "repoId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "\\S"
+            },
+            "taskId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "\\S"
+            },
+            "worktreeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "\\S"
+            },
+            "requirementIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "\\S"
+              },
+              "minItems": 1,
+              "maxItems": 4096,
+              "uniqueItems": true
+            },
+            "candidateOid": {
+              "type": "string",
+              "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$(?![\\s\\S])"
+            },
+            "baseOid": {
+              "type": "string",
+              "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$(?![\\s\\S])"
+            },
+            "mergeGroupId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "pattern": "\\S"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sourceSnapshotDigest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
+            },
+            "baselineDigest": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "required": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        }
+      }
+    }
+  },
+  "$comment": "Closed storage format. Runtime also checks checksum, UTF8 byte budgets, actual GE binding/envelope schema and replays every transition. Not evidence authentication."
+}

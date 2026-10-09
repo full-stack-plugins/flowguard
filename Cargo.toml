@@ -12,5 +12,9 @@ specguard = { path = "../specguard", version = "=0.1.0" }
 guardengine = { path = "../guardengine", version = "=0.1.0" }
 gitguard = { path = "../gitguard", version = "=0.1.0" }
 
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "=0.2.177"
+tempfile = "=3.23.0"
+
 [dev-dependencies]
 tempfile = "=3.23.0"

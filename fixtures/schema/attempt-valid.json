@@ -1,0 +1,106 @@
+{
+  "api_version": "flowguard.attempt-log/v1alpha1",
+  "store_id": "sha256:54d13473499fefe26ed7363454abe9c271fb6c172959c04b3bc999bbb2040589",
+  "events": [
+    {
+      "kind": "Advance",
+      "work": {
+        "target": "sha256:8eb3aed0a09824c31c5ed9f9db06d7b02683e3f70fe0a463c2b481cb9c60d931",
+        "digest": "sha256:6f5f66920cd200e04d09cc174dcb890edee57f9547a0aa666e3f9ffc6b3054e9",
+        "run_id": "first",
+        "binding": {
+          "repoId": "repo",
+          "taskId": "task",
+          "worktreeId": "w",
+          "requirementIds": [
+            "A"
+          ],
+          "candidateOid": "4700302a59b7495b4a6094343c6452d65878bc68",
+          "baseOid": "4700302a59b7495b4a6094343c6452d65878bc68",
+          "mergeGroupId": null,
+          "sourceSnapshotDigest": "sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be",
+          "baselineDigest": null
+        },
+        "required": [
+          "flowguard.action:sha256:9505cacb7c710ed17125fcc6cb3669e8ddca6c8cd8af6a31f6b3cd64604c3098",
+          "flowguard.frozen:sha256:4bde41df9d0e10d58f667ba6e507b8609bc23647c83720c59671bda3094c2982",
+          "flowguard.obligation:sha256:4d9e7cdd3ac46b65aee3a83d74ef96e8fdbbeb687e6f73cec367a948ceb2e81c",
+          "flowguard.stage:A/01",
+          "git.scope:sha256:9f1de08fc0f4308632bd963e9b2f6f20796bd0adf8e0f7f1090bd00210c467c7"
+        ]
+      },
+      "expected": 0
+    },
+    {
+      "kind": "Reserve",
+      "work": {
+        "target": "sha256:8eb3aed0a09824c31c5ed9f9db06d7b02683e3f70fe0a463c2b481cb9c60d931",
+        "digest": "sha256:6f5f66920cd200e04d09cc174dcb890edee57f9547a0aa666e3f9ffc6b3054e9",
+        "run_id": "first",
+        "binding": {
+          "repoId": "repo",
+          "taskId": "task",
+          "worktreeId": "w",
+          "requirementIds": [
+            "A"
+          ],
+          "candidateOid": "4700302a59b7495b4a6094343c6452d65878bc68",
+          "baseOid": "4700302a59b7495b4a6094343c6452d65878bc68",
+          "mergeGroupId": null,
+          "sourceSnapshotDigest": "sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be",
+          "baselineDigest": null
+        },
+        "required": [
+          "flowguard.action:sha256:9505cacb7c710ed17125fcc6cb3669e8ddca6c8cd8af6a31f6b3cd64604c3098",
+          "flowguard.frozen:sha256:4bde41df9d0e10d58f667ba6e507b8609bc23647c83720c59671bda3094c2982",
+          "flowguard.obligation:sha256:4d9e7cdd3ac46b65aee3a83d74ef96e8fdbbeb687e6f73cec367a948ceb2e81c",
+          "flowguard.stage:A/01",
+          "git.scope:sha256:9f1de08fc0f4308632bd963e9b2f6f20796bd0adf8e0f7f1090bd00210c467c7"
+        ]
+      },
+      "key": "request",
+      "generation": 1
+    },
+    {
+      "kind": "Reserve",
+      "work": {
+        "target": "sha256:8eb3aed0a09824c31c5ed9f9db06d7b02683e3f70fe0a463c2b481cb9c60d931",
+        "digest": "sha256:6f5f66920cd200e04d09cc174dcb890edee57f9547a0aa666e3f9ffc6b3054e9",
+        "run_id": "first",
+        "binding": {
+          "repoId": "repo",
+          "taskId": "task",
+          "worktreeId": "w",
+          "requirementIds": [
+            "A"
+          ],
+          "candidateOid": "4700302a59b7495b4a6094343c6452d65878bc68",
+          "baseOid": "4700302a59b7495b4a6094343c6452d65878bc68",
+          "mergeGroupId": null,
+          "sourceSnapshotDigest": "sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be",
+          "baselineDigest": null
+        },
+        "required": [
+          "flowguard.action:sha256:9505cacb7c710ed17125fcc6cb3669e8ddca6c8cd8af6a31f6b3cd64604c3098",
+          "flowguard.frozen:sha256:4bde41df9d0e10d58f667ba6e507b8609bc23647c83720c59671bda3094c2982",
+          "flowguard.obligation:sha256:4d9e7cdd3ac46b65aee3a83d74ef96e8fdbbeb687e6f73cec367a948ceb2e81c",
+          "flowguard.stage:A/01",
+          "git.scope:sha256:9f1de08fc0f4308632bd963e9b2f6f20796bd0adf8e0f7f1090bd00210c467c7"
+        ]
+      },
+      "key": "request",
+      "generation": 1
+    },
+    {
+      "kind": "Append",
+      "run_id": "first",
+      "envelope": "{\"apiVersion\":\"guard.integration/v1alpha1\",\"kind\":\"GuardRunEnvelope\",\"runId\":\"first\",\"producer\":{\"guard\":\"flowguard\",\"version\":\"0.1.0\",\"analyzerId\":\"flowguard.stage-gates\",\"analyzerVersion\":\"0.1.0\"},\"binding\":{\"repoId\":\"repo\",\"taskId\":\"task\",\"worktreeId\":\"w\",\"requirementIds\":[\"A\"],\"candidateOid\":\"4700302a59b7495b4a6094343c6452d65878bc68\",\"baseOid\":\"4700302a59b7495b4a6094343c6452d65878bc68\",\"mergeGroupId\":null,\"sourceSnapshotDigest\":\"sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be\",\"baselineDigest\":null},\"runStatus\":\"cancelled\",\"decision\":null,\"coverage\":{\"status\":\"partial\",\"requiredScopes\":[\"flowguard.action:sha256:9505cacb7c710ed17125fcc6cb3669e8ddca6c8cd8af6a31f6b3cd64604c3098\",\"flowguard.frozen:sha256:4bde41df9d0e10d58f667ba6e507b8609bc23647c83720c59671bda3094c2982\",\"flowguard.obligation:sha256:4d9e7cdd3ac46b65aee3a83d74ef96e8fdbbeb687e6f73cec367a948ceb2e81c\",\"flowguard.stage:A/01\",\"git.scope:sha256:9f1de08fc0f4308632bd963e9b2f6f20796bd0adf8e0f7f1090bd00210c467c7\"],\"observedScopes\":[\"flowguard.action:sha256:9505cacb7c710ed17125fcc6cb3669e8ddca6c8cd8af6a31f6b3cd64604c3098\",\"flowguard.frozen:sha256:4bde41df9d0e10d58f667ba6e507b8609bc23647c83720c59671bda3094c2982\",\"flowguard.stage:A/01\",\"git.scope:sha256:9f1de08fc0f4308632bd963e9b2f6f20796bd0adf8e0f7f1090bd00210c467c7\"],\"missingScopes\":[\"flowguard.obligation:sha256:4d9e7cdd3ac46b65aee3a83d74ef96e8fdbbeb687e6f73cec367a948ceb2e81c\"]},\"artifacts\":{\"contract\":null,\"facts\":null,\"report\":null,\"domain\":[]},\"approvalRefs\":[],\"diagnostics\":[{\"code\":\"gate.cancelled\",\"message\":\"workflow attempt did not establish usable evidence\",\"retryable\":false,\"source\":null}],\"startedAt\":\"2026-10-09T00:00:00Z\",\"finishedAt\":\"2026-10-09T00:00:00Z\",\"expiresAt\":null}"
+    },
+    {
+      "kind": "Publish",
+      "run_id": "first",
+      "expected": 1
+    }
+  ],
+  "checksum": "sha256:c20d3ba20d69e1a9a1f7b1c260ad95dcf5f5c9e506f6ddf33a2e76e44d337671"
+}

@@ -16,7 +16,8 @@ pub struct AttemptHandle {
     pub run_id: String,
     pub generation: u64,
 }
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct WorkIdentity {
     pub target: String,
     pub digest: String,
@@ -47,7 +48,13 @@ pub struct MemoryRunStore {
 }
 impl MemoryRunStore {
     pub fn advance(&self, gate: &PendingGate, expected: u64) -> Result<u64, StoreError> {
-        let work = gate.store_identity();
+        self.advance_work(gate.store_identity(), expected)
+    }
+    pub(crate) fn advance_work(
+        &self,
+        work: WorkIdentity,
+        expected: u64,
+    ) -> Result<u64, StoreError> {
         let mut state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
         if state.heads.get(&work.target).map_or(0, |h| h.generation) != expected {
             return Err(StoreError::Stale);
@@ -72,10 +79,17 @@ impl MemoryRunStore {
         key: &str,
         generation: u64,
     ) -> Result<AttemptHandle, StoreError> {
+        self.reserve_work(gate.store_identity(), key, generation)
+    }
+    pub(crate) fn reserve_work(
+        &self,
+        work: WorkIdentity,
+        key: &str,
+        generation: u64,
+    ) -> Result<AttemptHandle, StoreError> {
         if key.trim().is_empty() || key.len() > 128 {
             return Err(StoreError::Invalid);
         }
-        let work = gate.store_identity();
         let mut state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
         let index = (work.target.clone(), key.into());
         if let Some(id) = state.keys.get(&index) {
@@ -172,7 +186,9 @@ impl MemoryRunStore {
         Ok(())
     }
     pub fn current(&self, gate: &PendingGate) -> Result<Option<Vec<u8>>, StoreError> {
-        let work = gate.store_identity();
+        self.current_work(&gate.store_identity())
+    }
+    pub(crate) fn current_work(&self, work: &WorkIdentity) -> Result<Option<Vec<u8>>, StoreError> {
         let state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
         let Some(head) = state.heads.get(&work.target) else {
             return Ok(None);
@@ -188,7 +204,9 @@ impl MemoryRunStore {
     }
     /// Detached immutable bytes, deterministically ordered by run ID; no eligibility cache.
     pub fn history(&self, gate: &PendingGate) -> Result<Vec<Vec<u8>>, StoreError> {
-        let work = gate.store_identity();
+        self.history_work(&gate.store_identity())
+    }
+    pub(crate) fn history_work(&self, work: &WorkIdentity) -> Result<Vec<Vec<u8>>, StoreError> {
         let state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
         Ok(state
             .attempts
@@ -196,5 +214,16 @@ impl MemoryRunStore {
             .filter(|a| a.work.target == work.target)
             .filter_map(|a| a.bytes.clone())
             .collect())
+    }
+}
+
+impl MemoryRunStore {
+    pub(crate) fn generation_work(&self, work: &WorkIdentity) -> Result<Option<u64>, StoreError> {
+        let state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
+        Ok(state
+            .heads
+            .get(&work.target)
+            .filter(|head| head.digest == work.digest)
+            .map(|head| head.generation))
     }
 }

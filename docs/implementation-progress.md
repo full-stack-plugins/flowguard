@@ -87,3 +87,9 @@ Root accepted local tasks **3.3 and 3.4** at commit `0a5e912`, based on `/worksp
 Added `MemoryRunStore`: actual PendingGate-derived full work identity, separate idempotency/run IDs, immutable terminal-envelope bytes, mutex-atomic generation advance, single-assignment publication, and independent target histories. Seven tests cover duplicates/conflicts, authority-policy drift, changed-work late actual ALLOW after BLOCK, concurrent CAS/publication, and A/B use of one real Git worktree. Full suite: 48 locked integration tests passed; fmt/clippy/diff checks passed against updated GE c80ec32 local tree. See [memory store ADR](adr/memory-run-store.md).
 
 This completes only the explicit single-process memory profile of 4.1/4.2; tasks remain unchecked because persistent authorized-directory/schema, crash/restart fault tests and multiprocess behavior are absent. Storage validates structure/binding and never caches authority or grants eligibility. No push or execution writes.
+
+## Durable local attempt slice (review pending)
+
+Added opt-in Linux `DurableRunStore`, a strict versioned attempt-log schema, controlled owner-private storage, descriptor-anchored access, cross-process flock, fsync/rename persistence and replay through existing MemoryRunStore. Actual A/head1→A/head2 Git commits and independent B prove late ALLOW cannot overwrite current BLOCK or cross-satisfy B after reopens. Actual subprocesses test one-winner CAS and before/after-rename interruptions. A generation read supports uncertain-outcome reconciliation. See [durable store ADR](adr/durable-run-store.md).
+
+No new checkboxes: 4.1/4.2 are now presented for local-profile acceptance review, not self-accepted. Production authority, remote coordination/hardware power-loss and execution intent remain out of scope. Current total accepted stays 8/30.

@@ -95,6 +95,7 @@ version = "0.1.0"
 dependencies = [
  "gitguard",
  "guardengine",
+ "libc",
  "serde",
  "serde_json",
  "sha2",
@@ -358,6 +359,7 @@ dependencies = [
 name = "specguard"
 version = "0.1.0"
 dependencies = [
+ "guardengine",
  "libc",
  "pulldown-cmark",
  "serde",

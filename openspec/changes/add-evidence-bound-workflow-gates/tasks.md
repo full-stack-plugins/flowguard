@@ -40,7 +40,7 @@
 - [x] 1.1 在 `docs/adr/legacy-compatibility.md` 和 `fixtures/legacy/inventory.json` 记录可核实外部 flowguard-plugin 固定 SHA、许可证、实际命令/格式/Hook 与十阶段来源；为拿不到源码/接口不符建立调查案例并保留 unverified。验收：每个兼容声明都有源码/样例引用，无资料时无迁移承诺。对应 **Evidence-based legacy compatibility investigation**。
 - [ ] 1.2 在 `docs/adr/domain-schema.md` 冻结 StageRecord、BaselineRef、FrozenObligations、GateDecision 的独立 schema/规范编码与能力版本，保存 `schemas/workflow/` 及 `fixtures/schema/` 正反例。验收：未知字段/版本、空身份、变更摘要均被拒绝且不扩展 engine 对象。对应 **Versioned stage graph and immutable inheritance**、**Independent gate report and immutable upstream verdicts**。
 - [x] 1.3 在首个 `Cargo.toml`、`src/lib.rs`、`src/context.rs` 建立最小库和 `bind`，固定候选 Rust/依赖及资源预算 ADR；`tests/context_binding.rs` 覆盖明确/歧义 repo/task、缺 OID、SHA 对象格式与 dirty snapshot。验收：仅可核实完整输入产生 ValidatedBinding，前绑定错误不造 envelope。对应 **Binding-aware error and decision transport**。
-- [ ] 1.4 在 `src/stage.rs` 实现 docs 布局 resolver 和 SourceInventory；`tests/stage_discovery.rs` 对十阶段归属/路径/摘要逐项断言，并覆盖缺文档与未知版本。验收：所有必需源有终态、前后源树摘要一致、不创建 `.flowguard/`。对应 **Read-only native stage discovery**。
+- [x] 1.4 在 `src/stage.rs` 实现 docs 布局 resolver 和 SourceInventory；`tests/stage_discovery.rs` 对十阶段归属/路径/摘要逐项断言，并覆盖缺文档与未知版本。验收：所有必需源有终态、前后源树摘要一致、不创建 `.flowguard/`。对应 **Read-only native stage discovery**。
 - [x] 1.5 在 `adapters/openspec/mod.rs` 实现首个固定来源版本的引用读取，给 `adapters/{speckit,superpowers}/` 仅声明尚未支持的能力；`tests/source_adapter.rs` 验证原生 task ID、来源版本、混合权威源冲突。验收：正文不复制、不执行安装或文档指令；后续适配器逐个验收。对应 **Read-only native stage discovery**。
 - [x] 1.6 在 `src/input_limits.rs` 接入授权根/符号链接/大小/图输入预算；`tests/input_limits.rs` 覆盖越界 symlink、恶意文档指令、超限文本及可执行工件 URI。验收：全部拒绝或有界失败、日志脱敏、不把截断表示 complete。对应 **Bounded access and auditable stage evidence**。
 

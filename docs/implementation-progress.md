@@ -127,3 +127,7 @@ Root closed allocation P2 at `7b70bda` and accepted local **5.2**, based on `/wo
 ## Scoped specialist independent acceptance registration
 
 Root accepted local **3.2** at `ef916d8`, based on `/workspace/guard-implementation-ledger/flowguard-scoped-specialist-independent-review.md`:77 tests plus2 independent probes, Clippy/fmt/OpenSpec pass. Accepted total **13/30**. This is protected-controller scoped-source consumption with real AG/GG provenance and explicit fixture authority; actual SG/TG scoped chains and scoped CLI are not claimed.
+
+## Stage qualification independent acceptance registration
+
+Root accepted local **2.3** at `24ea862`, based on `/workspace/guard-implementation-ledger/flowguard-stage-independent-review.md`:88 tests plus an independent18-node shared-DAG budget probe, Clippy/fmt/OpenSpec pass. Accepted total **14/30**. The probe rejects at1024 visits after113 seconds; this is a work bound, not a latency SLA. Scope is protected local controller qualification; production authority remains external.

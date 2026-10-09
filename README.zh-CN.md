@@ -6,7 +6,7 @@
 
 ## 当前状态与证据
 
-原始基线 `a6bd25f` 只有设计文档；当前分支已有 Rust 库、四个只读 CLI 命令、真实 GE/GG 接口、显式 fixture 权限端口和本地持久运行存储。**12/30 项**已有独立本地 profile 验收，CLI5.1 已独立验收。详见 [实施进展](docs/implementation-progress.md)。生产权限提供方、宿主强制保护与 merge/release 执行尚未提供。
+原始基线 `a6bd25f` 只有设计文档；当前分支已有 Rust 库、四个只读 CLI 命令、真实 GE/GG 接口、显式 fixture 权限端口和本地持久运行存储。**13/30 项**已有独立本地 profile 验收，CLI5.1 已独立验收。详见 [实施进展](docs/implementation-progress.md)。生产权限提供方、宿主强制保护与 merge/release 执行尚未提供。
 
 外部插件已按 SHA `13b52b054c31f614dc272b18c195b8fa929aa595` 调查，见 [兼容性 ADR](docs/adr/legacy-compatibility.md)；不等于完整行为一致或迁移验收。运行 `cargo build --locked --bin flowguard` 构建，依赖同级 GE/GG/SG 源码。命令为 `discover`、`stage status`、`evidence verify`、`gate check`。参数与 fixture 边界见 [CLI 合同](docs/adr/cli-contract.md)，默认权限不可用，未实现 `--report` 输出参数。
 

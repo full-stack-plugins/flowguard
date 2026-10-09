@@ -123,3 +123,7 @@ Root's independent2MiB delimiter-row probe reproduced a32MiB column-vector alloc
 ## Legacy differential independent acceptance registration
 
 Root closed allocation P2 at `7b70bda` and accepted local **5.2**, based on `/workspace/guard-implementation-ledger/flowguard-legacy-independent-review.md`:72 product tests plus unchanged original allocator probe pass; actual15-read/49-transition legacy capture reproduces exact fixture SHA. Accepted total **12/30**. Scope is fixed-revision declaration differential with unsupported migration, not complete legacy CLI/host compatibility or authorization. Earlier pending-review statements are historical.
+
+## Scoped specialist independent acceptance registration
+
+Root accepted local **3.2** at `ef916d8`, based on `/workspace/guard-implementation-ledger/flowguard-scoped-specialist-independent-review.md`:77 tests plus2 independent probes, Clippy/fmt/OpenSpec pass. Accepted total **13/30**. This is protected-controller scoped-source consumption with real AG/GG provenance and explicit fixture authority; actual SG/TG scoped chains and scoped CLI are not claimed.

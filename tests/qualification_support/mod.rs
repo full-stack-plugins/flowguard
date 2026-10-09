@@ -84,6 +84,16 @@ pub fn produce(
     partial: bool,
     controller: &mut Controller,
 ) -> (ProtectedStagePlan, GateRun) {
+    produce_with_pending(b, g, intent, partial, controller, |_| {})
+}
+pub fn produce_with_pending(
+    b: &ValidatedBinding,
+    g: &StageGraph,
+    intent: StageIntent,
+    partial: bool,
+    controller: &mut Controller,
+    before_evaluate: impl FnOnce(&PendingGate),
+) -> (ProtectedStagePlan, GateRun) {
     let u = upstream(b, Enforcement::Advise, partial);
     let frozen = freeze(
         g,
@@ -137,6 +147,7 @@ pub fn produce(
             artifacts: u.artifacts(),
         })
         .collect();
+    before_evaluate(&pending);
     let run = pending.evaluate(&evidence, controller, NOW, TIME).unwrap();
     record(controller, run.envelope());
     (plan, run)

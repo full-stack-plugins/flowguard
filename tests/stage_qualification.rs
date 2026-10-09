@@ -506,3 +506,108 @@ fn graph_changes_and_alternative_protected_dependency_modes_do_not_reuse_qualifi
         .is_err()
     );
 }
+
+#[test]
+fn published_stage_consumption_rejects_withdrawn_dependency_even_with_live_approvals() {
+    use flowguard::{invalidation::*, run_store::MemoryRunStore};
+    let (_dir, b) = binding();
+    let g = graph();
+    let store = MemoryRunStore::default();
+    let mut controller = Controller::default();
+    let one = build_graph(vec![g.nodes()["first"].clone()], GraphLimits::default()).unwrap();
+    let digest = flowguard::digest(b"protected inputs");
+    let context = ContextDigests {
+        source: digest.clone(),
+        rules: digest.clone(),
+        analyzer: digest.clone(),
+        config: digest.clone(),
+        coverage: digest.clone(),
+        baseline: digest.clone(),
+        dependencies: digest,
+    };
+    let mut delta = None;
+    let (p1, r1) = produce_with_pending(
+        &b,
+        &g,
+        StageIntent::freeze(&g, "first", StageMode::Accept, &BTreeMap::new()).unwrap(),
+        false,
+        &mut controller,
+        |pending| {
+            store.advance(pending, 0).unwrap();
+            store.reserve(pending, "first", 1).unwrap();
+            let snapshot = |revoked| {
+                FrozenInputs::freeze(
+                    &one,
+                    &[NodeInput {
+                        node_id: "first",
+                        gate: pending,
+                        generation: 1,
+                        context: &context,
+                        freshness: Freshness {
+                            observed_at: NOW,
+                            expires_at: NOW + 60,
+                            revoked,
+                            artifacts_available: true,
+                        },
+                    }],
+                    NOW,
+                )
+                .unwrap()
+            };
+            delta = Some(snapshot(false).changes(&snapshot(true), NOW).unwrap());
+        },
+    );
+    store.append(&r1).unwrap();
+    store.publish(&r1.envelope().run_id, 1).unwrap();
+    approve(&mut controller, &p1, "first");
+    let q1 = p1
+        .qualify(
+            StageState::PendingAcceptance,
+            &r1,
+            "first",
+            vec![],
+            &controller,
+            NOW,
+        )
+        .unwrap();
+    let (p2, r2) = produce_with_pending(
+        &b,
+        &g,
+        StageIntent::freeze(
+            &g,
+            "second",
+            StageMode::Accept,
+            &BTreeMap::from([("first".into(), &p1)]),
+        )
+        .unwrap(),
+        false,
+        &mut controller,
+        |pending| {
+            store.advance(pending, 0).unwrap();
+            store.reserve(pending, "second", 1).unwrap();
+        },
+    );
+    store.append(&r2).unwrap();
+    store.publish(&r2.envelope().run_id, 1).unwrap();
+    approve(&mut controller, &p2, "second");
+    let q2 = p2
+        .qualify(
+            StageState::PendingAcceptance,
+            &r2,
+            "second",
+            vec![&q1],
+            &controller,
+            NOW,
+        )
+        .unwrap();
+    assert_eq!(
+        q2.consume_published(&p2, &store, &controller, NOW).unwrap(),
+        StageState::Accepted
+    );
+    delta.unwrap().apply(&store).unwrap();
+    assert!(q2.consume_published(&p2, &store, &controller, NOW).is_err());
+    assert_eq!(
+        q2.consume(&p2, &controller, NOW).unwrap(),
+        StageState::Accepted
+    ); // explicitly detached historical profile
+}

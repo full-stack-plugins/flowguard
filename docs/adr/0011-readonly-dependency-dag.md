@@ -1,6 +1,6 @@
 # Local read-only gate dependency DAG
 
-Status: implemented against exact bridge8212189 for independent review; task4.6 remains unchecked. The shared bridge fixed-clock baseline limitation below is being independently investigated before complete acceptance.
+Status: local fixture profile implemented for independent review; task4.6 remains unchecked pending fixed-source validation.
 
 The integration test composes real read-only specialist artifacts before producing a FlowGuard technical result. The complete success case must include current-candidate SG source/approved-baseline evidence together with AG, CG, TG and GG on the same Git candidate and requirement context. Historical SG2.6 exports are not substituted for required current-candidate evidence. The new SG bridge corpus remains an explicit local fixture authority profile.
 
@@ -15,4 +15,6 @@ The captured common context is candidate `10765def2dc06ff914c5e88df9ac5834d607e3
 
 `read_dependencies` performs actual artifact reads in topological order, with prerequisites checked before each read. Tests demonstrate technical ALLOW, each absent reader Partial/BLOCK, actual later Git commit rejection, refreshed producer/SG baseline/SG action approval revocation, provider failure and FlowGuard record expiry. Original gate/report bytes remain unchanged. The test authority wrapper only adds revocation; it never clears revocation returned by the underlying provider.
 
-Clock limitation at bridge8212189: the shared SG baseline provider authenticates with its fixed fixture NOW. The current tests establish current-record revocation and GE expiry, but do not establish SG baseline expiry after wall-clock advance. The root reviewer is independently probing that bridge boundary; this slice does not claim production time freshness or completed task4.6 acceptance until that condition is resolved and regression-tested.
+The formerly fixed-clock baseline limitation is covered by `baseline_time_advance_closes_preview_even_when_review_approval_lives_longer`: advancing protected consumption time beyond baseline expiry closes preview even when the review approval remains live. This is local fixture freshness, not a production identity claim.
+
+`five_guard_publication_is_withdrawn_after_protected_source_change` registers the real five-provider result in MemoryRunStore and uses the publication-aware controller preview. A protected source-digest change withdraws the stage10 publication and closes preview despite still-live provider records. The original envelope/report and repository refs/HEAD/index/source bytes remain identical. Exact transitive stage closures are separately covered by invalidation_matrix; this test does not relabel its single published gate node as a full stage qualification history.

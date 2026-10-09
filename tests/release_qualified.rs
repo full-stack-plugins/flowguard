@@ -147,3 +147,104 @@ fn release_freeze_rejects_non_09_unknown_feature_and_changed_release_graph() {
         .is_err()
     );
 }
+
+#[test]
+fn release10_published_fanin_rejects_withdrawn_feature_and_preserves_the_other() {
+    use flowguard::{invalidation::*, run_store::MemoryRunStore};
+    let (_dir, b) = binding();
+    let g = release_graph();
+    let mut c = Controller::default();
+    let store = MemoryRunStore::default();
+    let single = build_graph(vec![g.nodes()["a09"].clone()], GraphLimits::default()).unwrap();
+    let d = flowguard::digest(b"protected source inputs");
+    let context = ContextDigests {
+        source: d.clone(),
+        rules: d.clone(),
+        analyzer: d.clone(),
+        config: d.clone(),
+        coverage: d.clone(),
+        baseline: d.clone(),
+        dependencies: d,
+    };
+    let mut delta = None;
+    let (a, arun) = produce_with_pending(
+        &b,
+        &g,
+        StageIntent::freeze(&g, "a09", StageMode::Accept, &BTreeMap::new()).unwrap(),
+        false,
+        &mut c,
+        |pending| {
+            store.advance(pending, 0).unwrap();
+            store.reserve(pending, "a09", 1).unwrap();
+            let freeze = |revoked| {
+                FrozenInputs::freeze(
+                    &single,
+                    &[NodeInput {
+                        node_id: "a09",
+                        gate: pending,
+                        generation: 1,
+                        context: &context,
+                        freshness: Freshness {
+                            observed_at: NOW,
+                            expires_at: NOW + 60,
+                            revoked,
+                            artifacts_available: true,
+                        },
+                    }],
+                    NOW,
+                )
+                .unwrap()
+            };
+            delta = Some(freeze(false).changes(&freeze(true), NOW).unwrap());
+        },
+    );
+    let (other, brun) = produce_with_pending(
+        &b,
+        &g,
+        StageIntent::freeze(&g, "b09", StageMode::Accept, &BTreeMap::new()).unwrap(),
+        false,
+        &mut c,
+        |pending| {
+            store.advance(pending, 0).unwrap();
+            store.reserve(pending, "b09", 1).unwrap();
+        },
+    );
+    for run in [&arun, &brun] {
+        store.append(run).unwrap();
+        store.publish(&run.envelope().run_id, 1).unwrap();
+    }
+    let release = ReleasePlan::freeze(
+        &g,
+        "release",
+        &b,
+        &BTreeMap::from([("a".into(), &a), ("b".into(), &other)]),
+    )
+    .unwrap();
+    approve(&mut c, &a, "a");
+    approve(&mut c, &other, "b");
+    let qa = a
+        .qualify(StageState::PendingAcceptance, &arun, "a", vec![], &c, NOW)
+        .unwrap();
+    let qb = other
+        .qualify(StageState::PendingAcceptance, &brun, "b", vec![], &c, NOW)
+        .unwrap();
+    let features = BTreeMap::from([("a".into(), (&qa, &a)), ("b".into(), (&qb, &other))]);
+    let original = serde_json::to_vec(&[arun.envelope(), brun.envelope()]).unwrap();
+    release
+        .consume_published(&b, &features, &store, &c, NOW)
+        .unwrap();
+    delta.unwrap().apply(&store).unwrap();
+    assert!(
+        release
+            .consume_published(&b, &features, &store, &c, NOW)
+            .is_err()
+    );
+    assert_eq!(
+        qb.consume_published(&other, &store, &c, NOW).unwrap(),
+        StageState::Accepted
+    );
+    assert_eq!(
+        original,
+        serde_json::to_vec(&[arun.envelope(), brun.envelope()]).unwrap()
+    );
+}

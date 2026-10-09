@@ -294,7 +294,44 @@ impl ProtectedStagePlan {
     }
 }
 impl QualifiedStage<'_> {
-    /// Trusted time/current protected plan are supplied by the controller on every use.
+    /// Process-local publication-aware consumption, including every prerequisite.
+    pub fn consume_published(
+        &self,
+        current: &ProtectedStagePlan,
+        store: &crate::run_store::MemoryRunStore,
+        provider: &dyn AuthorityProvider,
+        now: i64,
+    ) -> Result<StageState, QualificationError> {
+        let mut runs = Vec::new();
+        self.collect_runs(&mut runs, 0)?;
+        store
+            .check_current_runs(&runs)
+            .map_err(|_| QualificationError::Technical)?;
+        let state = self.consume(current, provider, now)?;
+        // Check the whole prerequisite set atomically after all external reads.
+        store
+            .check_current_runs(&runs)
+            .map_err(|_| QualificationError::Technical)?;
+        Ok(state)
+    }
+
+    pub(crate) fn collect_runs<'a>(
+        &'a self,
+        runs: &mut Vec<&'a GateRun>,
+        depth: usize,
+    ) -> Result<(), QualificationError> {
+        if depth >= 64 || runs.len() >= 1024 || self.dependencies.len() > 64 {
+            return Err(QualificationError::Budget);
+        }
+        runs.push(self.run);
+        for dependency in &self.dependencies {
+            dependency.collect_runs(runs, depth + 1)?;
+        }
+        Ok(())
+    }
+
+    /// Detached evaluation using a current protected plan and fresh authority.
+    /// Controllers using MemoryRunStore invalidation must use consume_published.
     pub fn consume(
         &self,
         current: &ProtectedStagePlan,

@@ -146,6 +146,8 @@ fn changed_dependency_revokes_exact_downstream_and_preserves_old_bytes() {
         delta.affected(),
         &BTreeSet::from(["a".into(), "b".into(), "release".into()])
     );
+    assert_eq!(delta.causal_paths()["release"], vec!["a", "b", "release"]);
+    assert!(!delta.causal_paths().contains_key("other"));
     delta.apply(&store).unwrap();
     for (id, p) in &plans {
         assert_eq!(store.history(p).unwrap(), before[id]);
@@ -653,4 +655,93 @@ fn oversized_prepared_policy_is_rejected_before_work_identity_copy_or_hash() {
     ALLOC_ON.with(|on| on.set(false));
     assert!(result.is_err());
     assert!(MAX_ALLOCATION.with(|m| m.get()) < 4096);
+}
+
+#[test]
+fn published_consumption_rejects_withdrawal_and_refreshes_authority_without_locking_it() {
+    use guardengine::integration::eligibility::*;
+    let (_dir, b) = binding();
+    let u = upstream(&b, guardengine::Enforcement::Advise, false);
+    let g = graph(true);
+    let plans: BTreeMap<_, _> = g
+        .nodes()
+        .keys()
+        .map(|id| (id.clone(), plan(&b, &u, id)))
+        .collect();
+    let contexts: BTreeMap<_, _> = plans.keys().map(|id| (id.clone(), context())).collect();
+    let old = snapshot(&g, &plans, &contexts, None);
+    let new = snapshot(&g, &plans, &contexts, Some("a"));
+    let delta = old.changes(&new, NOW).unwrap();
+    let store = MemoryRunStore::default();
+    for (id, p) in &plans {
+        store.advance(p, 0).unwrap();
+        store.reserve(p, id, 1).unwrap();
+    }
+    let run = finish(&b, &u, plan(&b, &u, "release"));
+    let mut policy = policy(&u);
+    policy.action = "release".into();
+    policy.producer = run.envelope().producer.clone();
+    policy.required_scopes = plans["release"].required_scopes().to_vec();
+    policy.contract_digest = flowguard::digest(run.artifacts().unwrap().contract);
+    let authority = FixtureAuthority {
+        approval: None,
+        unavailable: false,
+    };
+    assert!(matches!(
+        store.evaluate_eligibility(&run, &policy, &authority, NOW),
+        Err(GateConsumptionError::Publication(_))
+    ));
+    store.append(&run).unwrap();
+    store.publish("release", 1).unwrap();
+    assert!(
+        store
+            .evaluate_eligibility(&run, &policy, &authority, NOW)
+            .unwrap()
+            .eligible
+    );
+    let unavailable = FixtureAuthority {
+        approval: None,
+        unavailable: true,
+    };
+    assert!(
+        store
+            .evaluate_eligibility(&run, &policy, &unavailable, NOW)
+            .is_err()
+    );
+    struct Withdraw<'a> {
+        store: &'a MemoryRunStore,
+        delta: &'a Invalidation,
+        called: std::cell::Cell<bool>,
+        inner: &'a FixtureAuthority,
+    }
+    impl AuthorityProvider for Withdraw<'_> {
+        fn verify_producer(
+            &self,
+            e: &guardengine::integration::GuardRunEnvelope,
+            d: &str,
+        ) -> Result<ProducerRecord, AuthorityError> {
+            if !self.called.replace(true) {
+                self.delta.apply(self.store).unwrap();
+            }
+            self.inner.verify_producer(e, d)
+        }
+        fn verify_approval(&self, r: &str) -> Result<ApprovalRecord, AuthorityError> {
+            self.inner.verify_approval(r)
+        }
+    }
+    let racing = Withdraw {
+        store: &store,
+        delta: &delta,
+        called: std::cell::Cell::new(false),
+        inner: &authority,
+    };
+    assert!(matches!(
+        store.evaluate_eligibility(&run, &policy, &racing, NOW),
+        Err(GateConsumptionError::Publication(StoreError::Stale))
+    ));
+    assert!(matches!(
+        store.evaluate_eligibility(&run, &policy, &authority, NOW),
+        Err(GateConsumptionError::Publication(StoreError::Stale))
+    ));
+    assert_eq!(store.history(&plans["release"]).unwrap().len(), 1);
 }

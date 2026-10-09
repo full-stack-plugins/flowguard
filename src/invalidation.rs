@@ -70,6 +70,7 @@ pub struct FrozenInputs {
 /// ```
 pub struct Invalidation {
     affected: BTreeSet<String>,
+    causal_paths: BTreeMap<String, Vec<String>>,
     old_heads: Vec<(WorkIdentity, u64)>,
 }
 fn bounded(value: &impl Serialize, limit: usize) -> Result<usize, InvalidationError> {
@@ -195,12 +196,21 @@ impl FrozenInputs {
                 affected.insert(id.clone());
             }
         }
+        let mut causal_paths: BTreeMap<String, Vec<String>> = affected
+            .iter()
+            .map(|id| (id.clone(), vec![id.clone()]))
+            .collect();
         // The union can contain cycles even though each graph is a DAG; monotone finite sets
         // compute its conservative closure without recursion or executing graph nodes.
         loop {
             let before = affected.len();
             for (id, node) in self.graph.nodes().iter().chain(current.graph.nodes()) {
-                if node.dependencies.iter().any(|d| affected.contains(d)) {
+                if !affected.contains(id)
+                    && let Some(parent) = node.dependencies.iter().find(|d| affected.contains(*d))
+                {
+                    let mut path = causal_paths[parent].clone();
+                    path.push(id.clone());
+                    causal_paths.insert(id.clone(), path);
                     affected.insert(id.clone());
                 }
             }
@@ -219,11 +229,18 @@ impl FrozenInputs {
         }
         Ok(Invalidation {
             affected,
+            causal_paths,
             old_heads,
         })
     }
 }
 impl Invalidation {
+    /// One deterministic old/new-edge causal path per affected node. Directly
+    /// changed nodes have a one-element path. Controllers may retain this audit
+    /// data alongside the delta; this does not rewrite any original report.
+    pub fn causal_paths(&self) -> &BTreeMap<String, Vec<String>> {
+        &self.causal_paths
+    }
     pub fn affected(&self) -> &BTreeSet<String> {
         &self.affected
     }

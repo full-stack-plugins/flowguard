@@ -47,6 +47,56 @@ pub struct MemoryRunStore {
     state: Mutex<State>,
 }
 impl MemoryRunStore {
+    /// Revalidate an exact currently published run and its live provider authority.
+    /// This is a process-local eligibility observation, never an execution grant.
+    pub fn evaluate_eligibility(
+        &self,
+        run: &GateRun,
+        policy: &guardengine::integration::eligibility::EligibilityPolicy,
+        provider: &dyn guardengine::integration::eligibility::AuthorityProvider,
+        now: i64,
+    ) -> Result<
+        guardengine::integration::eligibility::EligibilityResult,
+        crate::gate::GateConsumptionError,
+    > {
+        use crate::gate::GateConsumptionError::Publication;
+        self.check_current_runs(&[run]).map_err(Publication)?;
+        // Authority ports may be slow or reentrant. Never hold the store mutex
+        // while calling them; reject a concurrent withdrawal after they return.
+        let result = run.evaluate_eligibility(policy, provider, now)?;
+        self.check_current_runs(&[run]).map_err(Publication)?;
+        Ok(result)
+    }
+
+    pub(crate) fn check_current_runs(&self, runs: &[&GateRun]) -> Result<(), StoreError> {
+        if runs.len() > 1024 {
+            return Err(StoreError::Capacity);
+        }
+        let state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
+        for run in runs {
+            let attempt = state
+                .attempts
+                .get(&run.envelope().run_id)
+                .ok_or(StoreError::Missing)?;
+            let head = state
+                .heads
+                .get(&attempt.work.target)
+                .ok_or(StoreError::Missing)?;
+            if head.generation != attempt.handle.generation
+                || head.digest != run.work_digest()
+                || attempt.work.digest != run.work_digest()
+                || head.published.as_deref() != Some(run.envelope().run_id.as_str())
+            {
+                return Err(StoreError::Stale);
+            }
+            let bytes = serde_json::to_vec(run.envelope()).map_err(|_| StoreError::Invalid)?;
+            if attempt.bytes.as_ref() != Some(&bytes) {
+                return Err(StoreError::Invalid);
+            }
+        }
+        Ok(())
+    }
+
     pub fn advance(&self, gate: &PendingGate, expected: u64) -> Result<u64, StoreError> {
         self.advance_work(gate.store_identity(), expected)
     }

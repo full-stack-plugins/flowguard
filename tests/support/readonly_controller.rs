@@ -90,6 +90,24 @@ impl<'a> ReadOnlyController<'a> {
     }
     /// Controller caller supplies a fresh, protected current candidate observation;
     /// the integration harness obtains it from its real local repository.
+    pub fn preview_published(
+        &self,
+        run: &GateRun,
+        current_candidate: &str,
+        store: &flowguard::run_store::MemoryRunStore,
+        now: i64,
+    ) -> bool {
+        if self.record("read-current-candidate").is_err()
+            || current_candidate != self.policy.binding.candidate_oid
+            || self.record("refresh-eligibility").is_err()
+        {
+            return false;
+        }
+        store
+            .evaluate_eligibility(run, &self.policy, self, now)
+            .is_ok_and(|result| result.eligible)
+    }
+
     pub fn preview(&self, run: &GateRun, current_candidate: &str, now: i64) -> bool {
         if self.record("read-current-candidate").is_err() {
             return false;

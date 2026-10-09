@@ -377,3 +377,90 @@ fn baseline_time_advance_closes_preview_even_when_review_approval_lives_longer()
     assert!(!controller.preview(&run, &fixture.binding.binding().candidate_oid, NOW + 2));
     assert_eq!(original, serde_json::to_vec(run.envelope()).unwrap());
 }
+
+#[test]
+fn five_guard_publication_is_withdrawn_after_protected_source_change() {
+    use flowguard::{dependencies::*, invalidation::*, run_store::MemoryRunStore};
+    let fixture = Fixture::new();
+    let (order, captures) = read_dependencies(&fixture);
+    let evidence: Vec<_> = captures
+        .iter()
+        .enumerate()
+        .map(|(i, c)| c.evidence(&fixture.scopes[&order[i]]))
+        .collect();
+    let authority = FixtureAuthority::new();
+    let pending = fixture.pending();
+    let controller = readonly_controller::ReadOnlyController::freeze(
+        fixture.binding.binding(),
+        &pending,
+        &authority,
+    );
+    let store = MemoryRunStore::default();
+    store.advance(&pending, 0).unwrap();
+    store.reserve(&pending, "five-guard", 1).unwrap();
+    // The controller publication is one stage10 node; transitive stage closures
+    // are covered by invalidation_matrix. This snapshot cannot grant eligibility.
+    let mut node = fixture.graph.nodes()["gate"].clone();
+    node.dependencies.clear();
+    let graph = build_graph(vec![node], GraphLimits::default()).unwrap();
+    let d = flowguard::digest(b"protected ancillary inputs");
+    let context = ContextDigests {
+        source: fixture.binding.binding().source_snapshot_digest.clone(),
+        rules: d.clone(),
+        analyzer: d.clone(),
+        config: d.clone(),
+        coverage: d.clone(),
+        baseline: d.clone(),
+        dependencies: d,
+    };
+    let mut changed = context.clone();
+    changed.source = flowguard::digest(b"new protected source revision");
+    let freeze = |context| {
+        FrozenInputs::freeze(
+            &graph,
+            &[NodeInput {
+                node_id: "gate",
+                gate: &pending,
+                generation: 1,
+                context,
+                freshness: Freshness {
+                    observed_at: NOW,
+                    expires_at: NOW + 60,
+                    revoked: false,
+                    artifacts_available: true,
+                },
+            }],
+            NOW,
+        )
+        .unwrap()
+    };
+    let delta = freeze(&context).changes(&freeze(&changed), NOW).unwrap();
+    let before = repository_state(&fixture);
+    let run = controller.run(pending, &evidence, NOW, TIME);
+    store.append(&run).unwrap();
+    store.publish(&run.envelope().run_id, 1).unwrap();
+    let original = serde_json::to_vec(run.envelope()).unwrap();
+    let report = run.artifacts().unwrap().report.to_vec();
+    assert!(controller.preview_published(
+        &run,
+        &fixture.binding.binding().candidate_oid,
+        &store,
+        NOW
+    ));
+    delta.apply(&store).unwrap();
+    assert!(!controller.preview_published(
+        &run,
+        &fixture.binding.binding().candidate_oid,
+        &store,
+        NOW
+    ));
+    assert_eq!(original, serde_json::to_vec(run.envelope()).unwrap());
+    assert_eq!(report, run.artifacts().unwrap().report);
+    assert_eq!(before, repository_state(&fixture));
+    assert!(
+        controller
+            .calls()
+            .iter()
+            .all(|call| !["grant", "refs", "release", "merge-executor"].contains(call))
+    );
+}

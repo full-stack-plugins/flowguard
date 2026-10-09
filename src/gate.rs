@@ -78,6 +78,7 @@ struct RetainedEvidence {
 }
 #[derive(Debug, PartialEq, Eq)]
 pub enum GateConsumptionError {
+    Publication(crate::run_store::StoreError),
     ActionMismatch,
     IncompleteRun,
     SpecialistChanged(EligibilityCode),

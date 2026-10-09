@@ -82,6 +82,36 @@ impl ReleasePlan {
                 .collect(),
         })
     }
+    /// Publication-aware local release qualification; no release execution grant.
+    pub fn consume_published(
+        &self,
+        current: &ValidatedBinding,
+        features: &BTreeMap<String, (&QualifiedStage<'_>, &ProtectedStagePlan)>,
+        store: &crate::run_store::MemoryRunStore,
+        provider: &dyn AuthorityProvider,
+        now: i64,
+    ) -> Result<(), ReleaseError> {
+        if features.len() > 64 || !features.keys().eq(self.features.keys()) {
+            return Err(ReleaseError::Features);
+        }
+        let mut runs = Vec::new();
+        for (receipt, _) in features.values() {
+            receipt
+                .collect_runs(&mut runs, 0)
+                .map_err(|_| ReleaseError::Qualification)?;
+        }
+        store
+            .check_current_runs(&runs)
+            .map_err(|_| ReleaseError::Qualification)?;
+        self.consume(current, features, provider, now)?;
+        // Validate the complete fan-in in one critical section after callbacks,
+        // so withdrawal of an earlier feature during a later read is rejected.
+        store
+            .check_current_runs(&runs)
+            .map_err(|_| ReleaseError::Qualification)
+    }
+
+    /// Detached qualification; use consume_published with MemoryRunStore invalidation.
     pub fn consume(
         &self,
         current: &ValidatedBinding,

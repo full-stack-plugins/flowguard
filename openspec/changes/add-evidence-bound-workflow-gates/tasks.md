@@ -64,7 +64,7 @@
 - [x] 3.3 在 `src/projection.rs` 和 `fixtures/gate_mapping/` 建立版本化阶段缺口→精确事实/受保护断言映射；`tests/gate_projection.rs` 对合法/enforce/review/advise/partial/未映射缺口逐项校验。验收：强制缺口零漏映射，未知不以空 facts 放行，实际引擎 schema 可加载。对应 **Independent gate report and immutable upstream verdicts**。
 - [x] 3.4 在 `src/gate.rs` 生成自己的 GuardReport 与 domain GateDecision；`tests/independent_gate_report.rs` 固定上游 REQUIRE_APPROVAL 字节，分别输入批准前后观察及 enforce/BLOCK。验收：自身新报告可变但上游字节不变，信封等于自身报告，批准不能越过 enforce/partial，资格不签执行权。对应 **Independent gate report and immutable upstream verdicts**。
 - [x] 3.5 在 `src/transport.rs` 按 GE-CONTRACT 编码完整绑定后 envelope 与独立前绑定诊断；`tests/error_transport.rs` 覆盖参数歧义、未冻结范围、运行崩溃/超时/取消、有效 partial 和 malformed schema。验收：前绑定无 envelope，error/cancelled null，partial BLOCK；stdout 不混诊断。对应 **Binding-aware error and decision transport**。
-- [ ] 3.6 在 `tests/cross_guard_contract.rs` 接入政策要求的 AG-EVIDENCE/CG-ADAPTER/TG-EVIDENCE 和 GG-CANDIDATE 真实固定工件；保留 `fixtures/providers/` 能力清单。验收：CodeGuard 原生 command/flags/schema/退出码不改写，弱 profile 在要求引擎验证时被拒，缺任何必需 provider 不声称 FG-GATE。对应 **Scope-bound specialist evidence validation**、**Phased validation migration and reversible rollout**。
+- [x] 3.6 在 `tests/cross_guard_contract.rs` 接入政策要求的 AG-EVIDENCE/CG-ADAPTER/TG-EVIDENCE 和 GG-CANDIDATE 真实固定工件；保留 `fixtures/providers/` 能力清单。验收：CodeGuard 原生 command/flags/schema/退出码不改写，弱 profile 在要求引擎验证时被拒，缺任何必需 provider 不声称 FG-GATE。对应 **Scope-bound specialist evidence validation**、**Phased validation migration and reversible rollout**。
 
 ## 4. F3 信任、并发、失效与队列
 

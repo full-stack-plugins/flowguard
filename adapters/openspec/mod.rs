@@ -37,19 +37,34 @@ pub fn read_tasks(
     let source_digest = crate::digest(&bytes);
     let mut refs = Vec::new();
     let mut ids = std::collections::BTreeSet::new();
-    let mut fence: Option<char> = None;
+    let mut fence: Option<(u8, usize)> = None;
     for (index, line) in text.lines().enumerate() {
-        let line = line.trim_start();
-        if line.starts_with("```") || line.starts_with("~~~") {
-            let marker = line.chars().next().unwrap();
-            if fence == Some(marker) {
-                fence = None
-            } else if fence.is_none() {
-                fence = Some(marker)
-            };
+        // The supported native subset uses top-level Markdown blocks. Four-space
+        // indentation is a code example, not a task or a closing fence.
+        let indent = line.bytes().take_while(|b| *b == b' ').count();
+        if indent > 3 {
             continue;
         }
-        if fence.is_some() {
+        let line = &line[indent..];
+        let marker = line.as_bytes().first().copied();
+        let length = marker
+            .filter(|b| matches!(b, b'`' | b'~'))
+            .map(|b| line.bytes().take_while(|c| *c == b).count())
+            .unwrap_or(0);
+        if let Some((opening_marker, opening_length)) = fence {
+            if marker == Some(opening_marker)
+                && length >= opening_length
+                && line[length..].bytes().all(|b| matches!(b, b' ' | b'\t'))
+            {
+                fence = None;
+            }
+            continue;
+        }
+        if length >= 3 {
+            if marker == Some(b'`') && line[length..].contains('`') {
+                return Err("unsupported backtick fence info");
+            }
+            fence = Some((marker.expect("fence marker"), length));
             continue;
         }
         let Some(rest) = line

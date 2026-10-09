@@ -69,3 +69,50 @@ fn oversized_source_is_terminal_not_complete() {
     assert!(!i.complete());
     fs::remove_dir_all(p).unwrap();
 }
+#[test]
+fn public_inventory_requires_exact_unique_stage_scope_and_digests() {
+    use flowguard::stage::{SourceInventory, SourceRecord};
+    let good = SourceInventory {
+        version: "flowguard.docs/v1".into(),
+        sources: STAGES
+            .iter()
+            .map(|(stage, project)| SourceRecord {
+                stage: (*stage).into(),
+                owner: if *project {
+                    "project".into()
+                } else {
+                    "a".into()
+                },
+                path: if *project {
+                    format!("docs/project/{stage}.md")
+                } else {
+                    format!("docs/features/a/{stage}.md")
+                },
+                digest: Some(flowguard::digest(b"source")),
+                status: SourceStatus::Read,
+            })
+            .collect(),
+    };
+    assert!(good.complete());
+    let mut reordered = good.clone();
+    reordered.sources.reverse();
+    assert!(reordered.complete());
+    for case in 0..9 {
+        let mut bad = good.clone();
+        match case {
+            0 => bad.sources = vec![good.sources[0].clone(); 10],
+            1 => bad.version = "unknown".into(),
+            2 => bad.sources[0].digest = None,
+            3 => bad.sources[0].digest = Some("not-a-digest".into()),
+            4 => bad.sources[0].path = "docs/project/01-requirements.md".into(),
+            5 => bad.sources[0].owner = "b".into(),
+            6 => bad.sources[1].owner = "a".into(),
+            7 => bad.sources[0].stage = "unknown".into(),
+            _ => {
+                bad.sources[0].owner = "../escape".into();
+                bad.sources[0].path = "docs/features/../escape/01-requirements.md".into();
+            }
+        }
+        assert!(!bad.complete(), "case {case}");
+    }
+}

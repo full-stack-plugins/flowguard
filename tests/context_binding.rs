@@ -67,6 +67,22 @@ fn binds_actual_sha1_and_sha256_objects_and_rejects_ambiguity_and_drift() {
             candidate_oid: oid.clone(),
             base_oid: oid.clone(),
         };
+        let wire = serde_json::to_value(&snapshot).unwrap();
+        assert_eq!(wire["schema_version"], "gitguard.candidate/v1alpha2");
+        assert_eq!(wire["allowed_paths"], serde_json::json!([[97]]));
+        for (field, value) in [
+            (
+                "schema_version",
+                serde_json::json!("gitguard.candidate/v1alpha1"),
+            ),
+            ("allowed_paths", serde_json::json!([[98], [97]])),
+        ] {
+            let mut bad_wire = wire.clone();
+            bad_wire[field] = value;
+            let bad: gitguard::candidate::CandidateSnapshot =
+                serde_json::from_value(bad_wire).unwrap();
+            assert!(bind(&input, &repo, &bad).is_err(), "must reject {field}");
+        }
         let bound = bind(&input, &repo, &snapshot).unwrap();
         assert_eq!(bound.binding().candidate_oid, oid);
         assert_eq!(

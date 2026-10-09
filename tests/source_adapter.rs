@@ -38,3 +38,26 @@ fn native_task_references_preserve_ids_lines_and_version_without_copying_body() 
     assert!(read_tasks(&allowed, path, "1.14.1", &[SourceAuthority::OpenSpec]).is_err());
     fs::remove_dir_all(root).unwrap();
 }
+#[test]
+fn fenced_examples_require_matching_length_and_valid_closing_syntax() {
+    let root = tempfile::tempdir().unwrap();
+    fs::create_dir_all(root.path().join("openspec/changes/a")).unwrap();
+    let path = "openspec/changes/a/tasks.md";
+    let allowed = AllowedRoot::new(root.path(), 4096).unwrap();
+    for body in [
+        "- [ ] 1.1 Real task\n````md\n```\n- [ ] 9.9 Example\n```\n````\n",
+        "- [ ] 1.1 Real task\n~~~~md\n~~~\n- [ ] 9.9 Example\n~~~~\n",
+        "- [ ] 1.1 Real task\n```md\n```not-a-close\n- [ ] 9.9 Example\n```\n",
+        "- [ ] 1.1 Real task\n```md\n    ```\n- [ ] 9.9 Example\n   ```  \n",
+        "- [ ] 1.1 Real task\n```md\n~~~\n- [ ] 9.9 Example\n````\n",
+        "- [ ] 1.1 Real task\n    - [ ] 9.9 Indented example\n",
+    ] {
+        fs::write(root.path().join(path), body).unwrap();
+        let refs = read_tasks(&allowed, path, "1.14.1", &[SourceAuthority::OpenSpec]).unwrap();
+        assert_eq!(
+            refs.iter().map(|r| r.task_id.as_str()).collect::<Vec<_>>(),
+            vec!["1.1"],
+            "body {body:?}"
+        );
+    }
+}

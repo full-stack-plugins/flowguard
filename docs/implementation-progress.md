@@ -40,3 +40,14 @@ TDD evidence in `/workspace/guard-implementation-ledger/flowguard-*.log`: Most b
 Legacy survey: SHA 13b52b054c31f614dc272b18c195b8fa929aa595, Apache-2.0, source manifest 0.4.2, CLI help ran; registry 4 and transition 8 tests passed with isolated cloud state. Full legacy/host compatibility remains unverified.
 
 Final verification commands: `cargo test --locked`; `cargo fmt --check`; `cargo clippy --all-targets --no-deps -- -D warnings`; JSON Schema validator 4.26.0 over nine fixtures; `openspec validate add-evidence-bound-workflow-gates --strict --no-interactive --json`. Detailed command outcomes and final commit belong in the external slice report. Root owns independent review; no subagents, push, main merge, release or notifications performed.
+
+## Independent review follow-up
+
+Root review accepted local tasks 1.1/1.6/2.1/2.4; task boxes remain root-owned. Review P2 probes for duplicate/digestless inventory completeness and nested-length Markdown fences were reproduced as failing maintained tests before fixes.
+
+- `SourceInventory::complete` now validates the known inventory version, exact unique ten-stage set, valid source digests, read outcomes, expected project/feature paths and coherent feature ownership. It still does not authenticate serialized source observations.
+- Native task reader now retains the opening fence marker and length, requires a matching sufficiently long whitespace-terminated closer, respects the supported zero-to-three-space block indentation, and ignores four-space-indented examples. This remains a declared native subset, not a full Markdown implementation.
+- Refreshed Cargo.lock offline against coordinated sibling dependencies; GitGuard now depends on GuardEngine/time and the enabled time feature adds itoa. No unrelated crate version changes.
+- Promoted independent GG v1alpha2 scope assertions into context_binding: canonical allowed_paths [[97]], old schema rejected, unsorted paths rejected, both real SHA-1/SHA-256 repositories.
+
+Fresh commands after fixes: `cargo test --locked` (24 passed), `cargo fmt --check` (exit 0), `cargo clippy --all-targets --no-deps -- -D warnings` (exit 0). Test logs and exact source HEADs are in the external review-fixes report. All prior production/FG-GATE limitations remain; no task is checked on the strength of this fix alone.

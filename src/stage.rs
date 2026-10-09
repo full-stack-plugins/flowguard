@@ -36,7 +36,40 @@ pub struct SourceInventory {
 }
 impl SourceInventory {
     pub fn complete(&self) -> bool {
-        self.sources.len() == 10 && self.sources.iter().all(|s| s.status == SourceStatus::Read)
+        if self.version != "flowguard.docs/v1" || self.sources.len() != STAGES.len() {
+            return false;
+        }
+        let mut seen = std::collections::BTreeSet::new();
+        let mut feature_owner: Option<&str> = None;
+        for source in &self.sources {
+            let Some((_, project)) = STAGES.iter().find(|(stage, _)| *stage == source.stage) else {
+                return false;
+            };
+            if !seen.insert(source.stage.as_str())
+                || source.status != SourceStatus::Read
+                || !source.digest.as_deref().is_some_and(crate::valid_digest)
+            {
+                return false;
+            }
+            let expected_path = if *project {
+                if source.owner != "project" {
+                    return false;
+                }
+                format!("docs/project/{}.md", source.stage)
+            } else {
+                if !valid_feature(&source.owner)
+                    || feature_owner.is_some_and(|owner| owner != source.owner)
+                {
+                    return false;
+                }
+                feature_owner = Some(&source.owner);
+                format!("docs/features/{}/{}.md", source.owner, source.stage)
+            };
+            if source.path != expected_path {
+                return false;
+            }
+        }
+        true
     }
 }
 pub fn discover(
@@ -47,14 +80,7 @@ pub fn discover(
     if version != "flowguard.docs/v1" {
         return Err("unsupported source version");
     }
-    if feature.is_empty()
-        || feature.split('-').any(|part| {
-            part.is_empty()
-                || !part
-                    .bytes()
-                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
-        })
-    {
+    if !valid_feature(feature) {
         return Err("invalid feature identity");
     }
     let sources = STAGES
@@ -87,4 +113,14 @@ pub fn discover(
         version: version.into(),
         sources,
     })
+}
+
+fn valid_feature(feature: &str) -> bool {
+    !feature.is_empty()
+        && !feature.split('-').any(|part| {
+            part.is_empty()
+                || !part
+                    .bytes()
+                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
+        })
 }

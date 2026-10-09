@@ -64,3 +64,9 @@ Fingerprint recomputation, upstream/project release resolution, real-host hooks,
 裁决记录可以直接按 `D编号 → 选择上述新语义 / 保留旧owner及所需兼容行为 → 适用规则与文档范围` 填写；D7–D10 还需明确批准引用来源和调用映射。建议优先裁决 D1、D7–D10，因为它们决定状态、批准、依赖是否可互认；D3–D6 可独立选择拒绝歧义/坏输入。全部仍是建议，当前没有裁决记录。
 
 即使某项差异得到裁决，也只解除该规则的语义前置条件。5.6 尚缺逐规则调用路由、未裁决项停用行为、停新路由并保留审计/撤销历史的实际回滚演练；本次文档没有实现这些行为。受控 Linux GE 分发子片已验收，不能概括为“GE 全部阻塞”；正式生产依赖渠道和 N/N-1 兼容只能对另行实际测试的组合承诺。未裁决规则不进行 opt-in，且不修改 CodeGuard 或回退 Git refs。
+
+## 2026-10-09 approved implementation supersedes pending recommendations
+
+User instruction “FlowGuard 按建议” approved separate declaration/effective/eligibility display, the submit→pending_acceptance→qualified workflow with explicit invalidation on satisfying edits, and explicit feature/requirement/immutable09 release mappings that refuse missing/ambiguous inputs. Strict parsing, complete-byte new identities and deterministic graph ordering remain the accepted engineering defaults. Earlier unapproved/unsupported statements above describe the pre-decision inspection state.
+
+The implemented local entry points and remaining limits are in [rollout](../rollout.md); the executed rollback exercise is in [acceptance evidence](../../tests/acceptance/rollback.md). `migration_supported()` on a declaration observation remains false: no document, old approval or real release is automatically imported as authority. The new effective display performs bounded fingerprint observation, and the new local route delegates qualification to the existing protected core. Mapping validation is local contract evidence only; no real legacy release sample or actual protected host was supplied.

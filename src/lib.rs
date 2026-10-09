@@ -65,3 +65,7 @@ pub mod trust;
 pub mod host;
 #[path = "../adapters/mcp/mod.rs"]
 pub mod mcp;
+
+pub mod local_migration;
+
+pub mod release_mapping;

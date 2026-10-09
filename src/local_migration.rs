@@ -1,0 +1,169 @@
+//! Narrow process-local stage routing. Callers supply existing protected plans and
+//! authority ports. No persisted mode file, host controller or approval import.
+use crate::{
+    gate::GateRun,
+    stage_qualification::{ProtectedStagePlan, QualificationError, QualifiedStage},
+    stage_transition::{StageDeclaration, StageState},
+};
+use guardengine::integration::eligibility::AuthorityProvider;
+use serde::Serialize;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RouteMode {
+    Advisory,
+    Shadow,
+    OptIn,
+}
+#[derive(Debug, Serialize)]
+pub struct HistoryEntry {
+    pub sequence: usize,
+    pub event: String,
+    pub state: StageState,
+    pub mode: RouteMode,
+    pub legacy_source_digest: String,
+}
+pub struct LocalStageRoute<'a> {
+    receipt: Option<QualifiedStage<'a>>,
+    plan: &'a ProtectedStagePlan,
+    state: StageState,
+    mode: RouteMode,
+    history: Vec<HistoryEntry>,
+    legacy_source_digest: String,
+}
+impl<'a> LocalStageRoute<'a> {
+    pub fn new(
+        plan: &'a ProtectedStagePlan,
+        historical_state: StageState,
+        legacy_source_digest: String,
+    ) -> Result<Self, QualificationError> {
+        if !crate::valid_digest(&legacy_source_digest) {
+            return Err(QualificationError::Binding);
+        }
+        let mut route = Self {
+            receipt: None,
+            plan,
+            state: historical_state,
+            mode: RouteMode::Advisory,
+            history: Vec::new(),
+            legacy_source_digest,
+        };
+        route.append("legacy_history_only")?;
+        route.state = if matches!(
+            historical_state,
+            StageState::Accepted
+                | StageState::Inherited
+                | StageState::Skipped
+                | StageState::Invalidated
+        ) {
+            StageState::Invalidated
+        } else {
+            StageState::InProgress
+        };
+        route.append("new_workflow_unqualified")?;
+        Ok(route)
+    }
+    pub fn state(&self) -> StageState {
+        self.state
+    }
+    pub fn mode(&self) -> RouteMode {
+        self.mode
+    }
+    pub fn history(&self) -> &[HistoryEntry] {
+        &self.history
+    }
+    pub fn submit(&mut self) -> Result<(), QualificationError> {
+        self.declare(StageState::PendingAcceptance, "submit")
+    }
+    pub fn invalidate(&mut self) -> Result<(), QualificationError> {
+        self.declare(StageState::Invalidated, "invalidate")
+    }
+    pub fn set_mode(&mut self, mode: RouteMode) -> Result<(), QualificationError> {
+        self.capacity()?;
+        self.mode = mode;
+        self.append("route_changed")
+    }
+    pub fn rollback(&mut self) -> Result<(), QualificationError> {
+        self.capacity()?;
+        self.mode = RouteMode::Advisory;
+        self.append("rollback_new_route_stopped")
+    }
+    pub fn qualify(
+        &mut self,
+        run: &'a GateRun,
+        approval: &'a str,
+        dependencies: Vec<&'a QualifiedStage<'a>>,
+        provider: &dyn AuthorityProvider,
+        now: i64,
+    ) -> Result<bool, QualificationError> {
+        self.capacity()?;
+        let receipt =
+            match self
+                .plan
+                .qualify(self.state, run, approval, dependencies, provider, now)
+            {
+                Ok(receipt) => receipt,
+                Err(error) => {
+                    self.append("qualification_refused")?;
+                    return Err(error);
+                }
+            };
+        if self.mode != RouteMode::OptIn {
+            self.append("shadow_qualified_no_transfer")?;
+            return Ok(false);
+        }
+        self.state = receipt.consume(self.plan, provider, now)?;
+        self.append("qualified")?;
+        self.receipt = Some(receipt);
+        Ok(true)
+    }
+    pub fn edited(&mut self, plan: &'a ProtectedStagePlan) -> Result<(), QualificationError> {
+        self.capacity()?;
+        if plan.stage_id() != self.plan.stage_id() || plan.digest() == self.plan.digest() {
+            return Err(QualificationError::Binding);
+        }
+        // Record invalidation under the old plan before changing the plan reference.
+        self.invalidate()?;
+        self.plan = plan;
+        Ok(())
+    }
+    pub fn consume(
+        &self,
+        provider: &dyn AuthorityProvider,
+        now: i64,
+    ) -> Result<StageState, QualificationError> {
+        if self.mode != RouteMode::OptIn {
+            return Err(QualificationError::Transition);
+        }
+        self.receipt
+            .as_ref()
+            .ok_or(QualificationError::Transition)?
+            .consume(self.plan, provider, now)
+    }
+    fn capacity(&self) -> Result<(), QualificationError> {
+        if self.history.len() >= 1024 {
+            Err(QualificationError::Budget)
+        } else {
+            Ok(())
+        }
+    }
+    fn append(&mut self, event: &str) -> Result<(), QualificationError> {
+        self.capacity()?;
+        self.history.push(HistoryEntry {
+            sequence: self.history.len() + 1,
+            event: event.into(),
+            state: self.state,
+            mode: self.mode,
+            legacy_source_digest: self.legacy_source_digest.clone(),
+        });
+        Ok(())
+    }
+    fn declare(&mut self, state: StageState, event: &str) -> Result<(), QualificationError> {
+        self.capacity()?;
+        self.state = StageDeclaration::observed(self.state)
+            .apply_declaration(state)
+            .map_err(|_| QualificationError::Transition)?
+            .state();
+        self.receipt = None;
+        self.append(event)
+    }
+}

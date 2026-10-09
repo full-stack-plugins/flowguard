@@ -48,4 +48,5 @@ pub mod legacy;
 pub mod evidence;
 #[path = "../adapters/guards/mod.rs"]
 mod guard_adapters;
+pub mod release;
 pub mod stage_qualification;

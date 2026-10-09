@@ -245,6 +245,16 @@ impl ProtectedStagePlan {
     pub fn digest(&self) -> &str {
         &self.digest
     }
+    pub fn stage_id(&self) -> &str {
+        &self.intent.stage
+    }
+    pub fn graph_digest(&self) -> &str {
+        &self.intent.graph_digest
+    }
+    pub fn context_digest(&self) -> &str {
+        &self.context
+    }
+
     /// Expected native policy, derived before execution; never filled from GateRun.
     pub fn approval_policy(&self) -> &EligibilityPolicy {
         &self.policy

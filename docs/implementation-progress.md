@@ -51,3 +51,17 @@ Root review accepted local tasks 1.1/1.6/2.1/2.4; task boxes remain root-owned. 
 - Promoted independent GG v1alpha2 scope assertions into context_binding: canonical allowed_paths [[97]], old schema rejected, unsorted paths rejected, both real SHA-1/SHA-256 repositories.
 
 Fresh commands after fixes: `cargo test --locked` (24 passed), `cargo fmt --check` (exit 0), `cargo clippy --all-targets --no-deps -- -D warnings` (exit 0). Test logs and exact source HEADs are in the external review-fixes report. All prior production/FG-GATE limitations remain; no task is checked on the strength of this fix alone.
+
+## Root accepted-task registration
+
+Root's independent review and fix recheck accepted exactly **1.1, 1.3, 1.5, 1.6, 2.1, 2.4** (6/30) at their documented local/advisory scope. Only those six OpenSpec task boxes are checked. Evidence: `/workspace/guard-implementation-ledger/flowguard-review.md`, review probes, `flowguard-review-fixes-tests.log` (24 locked tests) and root's explicit acceptance after `ed6d19d`. Task 1.4 remains unchecked: its original behavioral RED capture gap is retained honestly.
+
+## Next small slice plan: local engine-backed gate evaluation
+
+- 3.3: versioned closed gap projection into actual GuardEngine forbid_relation types; unknown/missing/incomplete required observations cannot yield empty-facts ALLOW. Test legal/enforce/review/advise/partial and unmapped finding.
+- 3.4 plus 1.2 substep: strict versioned GateDecision domain artifact, actual new FlowGuard GuardReport; immutable upstream report bytes and independently derived action eligibility. Test external approval before/after REQUIRE_APPROVAL without rewriting upstream; enforce and partial remain blocking.
+- 3.5 substep: prepare real GE BoundAttempt before collection with frozen required scopes; finish with observed coverage using reviewed AttemptOutput API, required scopes unchanged; error/cancelled keep null decision. No second engine DTOs.
+- 3.2/GE-TRUST local substep: consume GE verify_engine_artifacts/evaluate_eligibility ports on exact frozen expected binding/producer/coverage/contract and fixture authority, never boolean self-certification. Real production provider/cross-guard 3.6 remain absent.
+- Integration: retain actual GG v1alpha2 candidate scope digest within frozen scope identity to avoid using narrower RunBinding as reuse key. SG export remains fixture-only at its current reviewed schema.
+
+All new task claims remain partial until root review; no production FG-GATE or execution grant. Execute TDD and commit this slice for review before broadening.

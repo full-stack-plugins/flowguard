@@ -37,21 +37,21 @@
 
 接口：`discover(AllowedRoot, SourceProfile) -> SourceInventory`；`bind(InvocationInput, CandidateObservation) -> ValidatedBinding | PreBindingDiagnostic`。本组输出本地 fixture 与明确能力边界，不宣称跨仓集成。
 
-- [ ] 1.1 在 `docs/adr/legacy-compatibility.md` 和 `fixtures/legacy/inventory.json` 记录可核实外部 flowguard-plugin 固定 SHA、许可证、实际命令/格式/Hook 与十阶段来源；为拿不到源码/接口不符建立调查案例并保留 unverified。验收：每个兼容声明都有源码/样例引用，无资料时无迁移承诺。对应 **Evidence-based legacy compatibility investigation**。
+- [x] 1.1 在 `docs/adr/legacy-compatibility.md` 和 `fixtures/legacy/inventory.json` 记录可核实外部 flowguard-plugin 固定 SHA、许可证、实际命令/格式/Hook 与十阶段来源；为拿不到源码/接口不符建立调查案例并保留 unverified。验收：每个兼容声明都有源码/样例引用，无资料时无迁移承诺。对应 **Evidence-based legacy compatibility investigation**。
 - [ ] 1.2 在 `docs/adr/domain-schema.md` 冻结 StageRecord、BaselineRef、FrozenObligations、GateDecision 的独立 schema/规范编码与能力版本，保存 `schemas/workflow/` 及 `fixtures/schema/` 正反例。验收：未知字段/版本、空身份、变更摘要均被拒绝且不扩展 engine 对象。对应 **Versioned stage graph and immutable inheritance**、**Independent gate report and immutable upstream verdicts**。
-- [ ] 1.3 在首个 `Cargo.toml`、`src/lib.rs`、`src/context.rs` 建立最小库和 `bind`，固定候选 Rust/依赖及资源预算 ADR；`tests/context_binding.rs` 覆盖明确/歧义 repo/task、缺 OID、SHA 对象格式与 dirty snapshot。验收：仅可核实完整输入产生 ValidatedBinding，前绑定错误不造 envelope。对应 **Binding-aware error and decision transport**。
+- [x] 1.3 在首个 `Cargo.toml`、`src/lib.rs`、`src/context.rs` 建立最小库和 `bind`，固定候选 Rust/依赖及资源预算 ADR；`tests/context_binding.rs` 覆盖明确/歧义 repo/task、缺 OID、SHA 对象格式与 dirty snapshot。验收：仅可核实完整输入产生 ValidatedBinding，前绑定错误不造 envelope。对应 **Binding-aware error and decision transport**。
 - [ ] 1.4 在 `src/stage.rs` 实现 docs 布局 resolver 和 SourceInventory；`tests/stage_discovery.rs` 对十阶段归属/路径/摘要逐项断言，并覆盖缺文档与未知版本。验收：所有必需源有终态、前后源树摘要一致、不创建 `.flowguard/`。对应 **Read-only native stage discovery**。
-- [ ] 1.5 在 `adapters/openspec/mod.rs` 实现首个固定来源版本的引用读取，给 `adapters/{speckit,superpowers}/` 仅声明尚未支持的能力；`tests/source_adapter.rs` 验证原生 task ID、来源版本、混合权威源冲突。验收：正文不复制、不执行安装或文档指令；后续适配器逐个验收。对应 **Read-only native stage discovery**。
-- [ ] 1.6 在 `src/input_limits.rs` 接入授权根/符号链接/大小/图输入预算；`tests/input_limits.rs` 覆盖越界 symlink、恶意文档指令、超限文本及可执行工件 URI。验收：全部拒绝或有界失败、日志脱敏、不把截断表示 complete。对应 **Bounded access and auditable stage evidence**。
+- [x] 1.5 在 `adapters/openspec/mod.rs` 实现首个固定来源版本的引用读取，给 `adapters/{speckit,superpowers}/` 仅声明尚未支持的能力；`tests/source_adapter.rs` 验证原生 task ID、来源版本、混合权威源冲突。验收：正文不复制、不执行安装或文档指令；后续适配器逐个验收。对应 **Read-only native stage discovery**。
+- [x] 1.6 在 `src/input_limits.rs` 接入授权根/符号链接/大小/图输入预算；`tests/input_limits.rs` 覆盖越界 symlink、恶意文档指令、超限文本及可执行工件 URI。验收：全部拒绝或有界失败、日志脱敏、不把截断表示 complete。对应 **Bounded access and auditable stage evidence**。
 
 ## 2. F1 阶段图、基线和批准观察
 
 接口：`build_graph(SourceInventory, StageProfile) -> StageGraph`；`resolve_baseline(BaselineRef, Scope) -> InheritanceSnapshot`；`ApprovalProvider.observe(ApprovalRef, ValidatedBinding, Action) -> VerifiedApprovalObservation | ProviderError`。真实需求 ID/义务导入等待 SG-BASELINE，批准端口此时仅测试替身。
 
-- [ ] 2.1 在 `src/dependencies.rs` 建立稳定节点和显式 DAG 校验；`tests/stage_graph.rs` 覆盖十阶段、悬空边、环、重复归属及乱序输入。验收：图排序确定、定位冲突且循环有限结束。对应 **Versioned stage graph and immutable inheritance**。
+- [x] 2.1 在 `src/dependencies.rs` 建立稳定节点和显式 DAG 校验；`tests/stage_graph.rs` 覆盖十阶段、悬空边、环、重复归属及乱序输入。验收：图排序确定、定位冲突且循环有限结束。对应 **Versioned stage graph and immutable inheritance**。
 - [ ] 2.2 在 `src/baseline.rs` 实现不可变继承，`tests/baseline_inheritance.rs` 比较 A/B 独立范围、共享 02/07、latest 替换、父摘要变化与发布 10 的功能 09 集合。验收：只共享确切有效引用，不能复制 accepted 或隐式换父版本。对应 **Versioned stage graph and immutable inheritance**、**Dependency-aware eligibility invalidation**。
 - [ ] 2.3 在 `src/stage_transition.rs` 实现声明/资格分离的转换表；`tests/stage_transition.rs` 覆盖全部七状态、伪 accepted、未批准 skipped 和 invalidated 重新提交。验收：非法边均拒绝，阶段状态不是技术/执行状态。对应 **Explicit stage transitions and remediation scope**。
-- [ ] 2.4 在 `docs/adr/approval-port.md` 与 `src/approvals.rs` 固定只读批准端口、identity/action/scope/digest/expiry/revocation 校验和刷新策略；`tests/approval_observation.rs` 注入过期、撤销、越权、布尔自证、服务故障。验收：故障不等于确认无批准，生产 provider 选择仍需 GE-TRUST 与独立审查。对应 **Authenticated approval observations**。
+- [x] 2.4 在 `docs/adr/approval-port.md` 与 `src/approvals.rs` 固定只读批准端口、identity/action/scope/digest/expiry/revocation 校验和刷新策略；`tests/approval_observation.rs` 注入过期、撤销、越权、布尔自证、服务故障。验收：故障不等于确认无批准，生产 provider 选择仍需 GE-TRUST 与独立审查。对应 **Authenticated approval observations**。
 - [ ] 2.5 在 `src/action_policy.rs` 定义受保护阶段适用性、TDD 前置测试例外及修复动作范围；`tests/action_policy.rs` 覆盖提交受阻但授权补测试可用、未授权 skip、候选缩减适用阶段。验收：合法修复不被全局封禁，交付资格不因此放松。对应 **Explicit stage transitions and remediation scope**、**Frozen domain evidence obligations**。
 - [ ] 2.6 在 `adapters/specguard/mod.rs` 接入 SG-BASELINE 稳定 requirement IDs、固定批准基线和义务引用；`tests/specguard_baseline_contract.rs` 保存真实版本样例并覆盖范围缺失/版本不符。验收：真实与模拟样例标记分离，不复制规格正文，无 SG 能力时相应门禁保持未满足。对应 **Versioned stage graph and immutable inheritance**、**Frozen domain evidence obligations**。
 

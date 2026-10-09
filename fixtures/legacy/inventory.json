@@ -17,11 +17,12 @@
   "executed": [
     "python3 scripts/flowguard_state.py --help",
     "test_registry.py: 4 passed",
-    "test_stage_transitions.py: 8 passed (explicit isolated state root)"
+    "test_stage_transitions.py: 8 passed (explicit isolated state root)",
+    "fixed-revision read differential: 15 actual cases; 49 LEGAL transition pairs"
   ],
   "unverified": [
     "full legacy suite",
-    "legacy/new differential",
+    "full operational legacy/new parity (declaration differential only)",
     "real host hook protection",
     "approval authenticity"
   ],

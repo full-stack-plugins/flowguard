@@ -41,3 +41,6 @@ pub mod run_store;
 pub mod durable_run_store;
 
 pub mod cli;
+
+#[path = "../adapters/legacy/mod.rs"]
+pub mod legacy;

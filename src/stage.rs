@@ -115,7 +115,7 @@ pub fn discover(
     })
 }
 
-fn valid_feature(feature: &str) -> bool {
+pub(crate) fn valid_feature(feature: &str) -> bool {
     !feature.is_empty()
         && !feature.split('-').any(|part| {
             part.is_empty()

@@ -111,3 +111,7 @@ The local CLI profile is ready for independent review; task5.1 remains unchecked
 ## Read-only CLI independent acceptance registration
 
 Root accepted local task **5.1** at `8c62afb`, based on `/workspace/guard-implementation-ledger/flowguard-cli-independent-review.md`: 67 existing tests plus 2 independent probes, no reproducible P1/P2. Accepted total **11/30**. This is the explicit read-only CLI profile; fixture receipts do not authenticate production identities or authorize execution. Earlier pending-review entries above are historical.
+
+## Fixed legacy declaration differential (review pending)
+
+Task5.2 local slice adds bounded read-only parsing of the surveyed exact legacy revision and fifteen captured actual legacy reads, including accepted/inherited/skipped/invalidated, malformed/unknown/fault inputs and duplicate/fenced-table differences. Forty-nine legacy transition pairs are compared to the existing FlowGuard transition owner. No old declaration supplies new evidence authority; migration stays unsupported. Capture replay is byte-identical. Four focused tests and the full71-test pinned regression pass; exact source pins and the initial moving-GitGuard regression failure are recorded in `/workspace/guard-implementation-ledger/flowguard-legacy-slice-report.md`. Task5.2 remains unchecked pending independent review; accepted total stays11/30.

@@ -1,0 +1,173 @@
+{
+  "revision": "13b52b054c31f614dc272b18c195b8fa929aa595",
+  "sourceSha256": "1df0f26b26a754dc1854457b561ecce4db63860aae62c63043643aa544266a00",
+  "cases": [
+    {
+      "name": "pending",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | pending |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "pending",
+        "missing": false
+      }
+    },
+    {
+      "name": "in_progress",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | in_progress |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "in_progress",
+        "missing": false
+      }
+    },
+    {
+      "name": "pending_acceptance",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | pending_acceptance |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "pending_acceptance",
+        "missing": false
+      }
+    },
+    {
+      "name": "accepted",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | accepted |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "accepted",
+        "missing": false
+      }
+    },
+    {
+      "name": "inherited",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | inherited |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "inherited",
+        "missing": false
+      }
+    },
+    {
+      "name": "skipped",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | skipped |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "skipped",
+        "missing": false
+      }
+    },
+    {
+      "name": "invalidated",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | invalidated |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\n",
+      "fault": null,
+      "legacy": {
+        "status": "invalidated",
+        "missing": false
+      }
+    },
+    {
+      "name": "body-invalidated",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | accepted |\n| 前置指纹 | project |\n| 验收指纹 | 0af0dcdaf8f7ebf1d388a3bd79e48bcf24f917e4c809288bc4c902f57a6202ba |\n\nActual content\nchanged content\n",
+      "fault": null,
+      "legacy": {
+        "status": "invalidated",
+        "missing": false
+      }
+    },
+    {
+      "name": "unknown-state",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | approved |\n",
+      "fault": null,
+      "legacy": {
+        "error": "StageDocError"
+      }
+    },
+    {
+      "name": "wrong-stage",
+      "text": "| 阶段 | 99-unknown |\n| 阶段状态 | pending |\n",
+      "fault": null,
+      "legacy": {
+        "error": "StageDocError"
+      }
+    },
+    {
+      "name": "duplicate-state",
+      "text": "| 阶段 | 02-architecture |\n| 阶段状态 | pending |\n| 阶段状态 | in_progress |\n",
+      "fault": null,
+      "legacy": {
+        "status": "in_progress",
+        "missing": false
+      }
+    },
+    {
+      "name": "fenced-example",
+      "text": "```md\n| 阶段 | 02-architecture |\n| 阶段状态 | pending |\n```\n",
+      "fault": null,
+      "legacy": {
+        "status": "pending",
+        "missing": false
+      }
+    },
+    {
+      "name": "missing",
+      "text": null,
+      "fault": null,
+      "legacy": {
+        "status": "pending",
+        "missing": true
+      }
+    },
+    {
+      "name": "directory",
+      "text": null,
+      "fault": "directory",
+      "legacy": {
+        "status": "pending",
+        "missing": true
+      }
+    },
+    {
+      "name": "invalid-utf8",
+      "text": null,
+      "fault": "invalid-utf8",
+      "legacy": {
+        "error": "UnicodeDecodeError"
+      }
+    }
+  ],
+  "legal": {
+    "pending": [
+      "in_progress",
+      "accepted",
+      "inherited",
+      "skipped"
+    ],
+    "in_progress": [
+      "pending_acceptance",
+      "accepted",
+      "inherited",
+      "skipped"
+    ],
+    "pending_acceptance": [
+      "in_progress",
+      "accepted",
+      "inherited",
+      "skipped"
+    ],
+    "invalidated": [
+      "in_progress",
+      "accepted",
+      "inherited",
+      "skipped"
+    ],
+    "accepted": [
+      "in_progress"
+    ],
+    "inherited": [
+      "in_progress"
+    ],
+    "skipped": [
+      "in_progress"
+    ]
+  }
+}

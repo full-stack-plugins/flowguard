@@ -37,6 +37,8 @@ Native specification + task/worktree + protected baseline → frozen stage oblig
 - The trusted merge-queue controller recomputes obligations and evidence for the exact integration candidate. GitGuard checks Git-domain conditions; the hosting platform executes the protected merge. FlowGuard does not merge or release.
 - `ALLOW` is a scoped technical decision. Missing approval can yield `REQUIRE_APPROVAL` only when required analysis is complete; incomplete evidence and tool failures cannot be waived by approval. Reads, clarification, and authorized remediation remain available.
 
+FlowGuard’s proposed gate check produces its own engine-backed report over stage-obligation facts. Its envelope decision and exit code reflect that report, not a rewritten specialist verdict. A specialist `REQUIRE_APPROVAL` remains unchanged after external approval; a new FlowGuard evaluation may find that the scoped review obligation is satisfied. Action eligibility is recorded separately in a domain artifact, and the trusted controller still authorizes execution. The fact projection and protected gate rules require implementation and parity fixtures before use.
+
 Current GuardEngine protocol `guard.partme.ai/v1alpha1` is distinct from the proposed [integration envelope](docs/integration-contract.md). It supports strict GuardContract/GuardFacts/GuardReport and exact `forbid_relation`, not FlowGuard stage or approval objects. Reports are unsigned; recomputation establishes consistency, not provenance or authority.
 
 ## Planned CLI — not runnable

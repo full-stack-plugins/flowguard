@@ -72,13 +72,19 @@ Native specs + stage documents + authenticated invocation
 
 输出包含目标动作、缺失义务、证据/批准引用和范围决策。集成信封将 `runStatus=completed/error/cancelled` 与决策分开；失败时 decision 为空，不能制造成功报告。错误详情使用独立诊断对象，不扩展 v1alpha1 GuardReport。FlowGuard 记录动作资格，不签发执行权；若将来定义 ExecutionGrant，应由可信控制器单独签发，仍需协议和威胁模型评审。
 
+### 技术决策与动作资格分离
+
+目标 gate check 将 FlowGuard 自己的阶段/义务观察投影成兼容 facts，由受保护的流程规则生成独立 GuardReport；该次 GuardRunEnvelope.decision 必须等于所引用的 FlowGuard 报告 decision。专业守卫报告各自保留原决策：外部批准不会把其 REQUIRE_APPROVAL 改写成 ALLOW。批准状态变化产生新的调用尝试和 FlowGuard 事实快照；新的流程报告可以不同于其引用的专业报告，因为检查范围不同，而不是审批重写了技术证据。
+
+GateDecision 中的动作资格是独立领域结果，通过既有 `artifacts.domain` 引用，不能覆盖信封 decision 或添加未定义的共享字段。可信控制器综合有效技术报告、真实批准和权限决定是否授权动作。下游 enforce/BLOCK、partial 和工具错误不能因批准而被判为已满足。投影必须用已支持的精确关系覆盖所有必需缺口；尚无可验证投影时报告能力未支持，不生成任意 ALLOW。
+
 ## 5. 状态机与行动资格
 
 目标阶段状态保留 `pending → in_progress → pending_acceptance → accepted`，旁路为 `inherited/skipped/invalidated`。accepted 要求完整且有效的领域证据、必要的真实批准和有效前置阶段；inherited 要求满足相同要求的确切父基线；skipped 需要经过认证、限范围且未过期的跳过批准。invalidated 必须重新计算义务和验证，不能手改回 accepted。阶段完成度、检查运行状态和技术决策是三个独立维度。
 
 拟议默认动作策略：业务编码要求适用的 01—07；提交要求 08/09 和冻结的专业证据；发布要求 10、指定功能集合的 09、相关依赖与发布验收。阶段不是机械地要求所有任务填写所有文档：适用性和 TDD 前置测试例外必须由受保护策略明确，不能由 Agent 临时缩减义务。读取、澄清、补测试和已授权修复有独立动作资格，不因交付门禁阻断而全部封禁。
 
-决策优先级：工具故障/取消先输出运行状态且不放行；分析缺失、不完整、范围不符或确定违规为 BLOCK；分析完整且其他条件满足但缺可信批准为 REQUIRE_APPROVAL；全部义务满足才为 ALLOW。批准不能覆盖不完整分析或工具失败。ALLOW 不等于合并或发布授权。
+FlowGuard 自身门禁规则的目标决策优先级（不改写下游报告）：工具故障/取消先输出运行状态且不放行；分析缺失、不完整、范围不符或确定违规为 BLOCK；分析完整且其他条件满足但缺可信批准为 REQUIRE_APPROVAL；全部义务满足才为 ALLOW。批准不能覆盖不完整分析或工具失败。ALLOW 不等于合并或发布授权。
 
 ## 6. 失效、并发需求与合并队列
 

@@ -37,6 +37,8 @@
 - 可信合并队列控制器针对精确集成候选重新计算义务与证据；GitGuard 检查 Git 领域条件，托管平台执行受保护合并。FlowGuard 不执行合并或发布。
 - `ALLOW` 仅是指定范围的技术决策。仅在必要分析完整时，缺少审批才可产生 `REQUIRE_APPROVAL`；审批不能豁免不完整分析或工具故障。读取、澄清与已授权修复保持可用。
 
+拟议 FlowGuard gate check 对阶段义务事实生成自己的引擎报告；信封 decision 与退出码反映该报告，不改写专业守卫结论。外部批准后，专业报告的 `REQUIRE_APPROVAL` 保持原样；新的 FlowGuard 评估可以确认指定范围的待审义务已满足。动作资格单独记录在领域附件，执行仍由可信控制器授权。事实投影和受保护门禁规则须先实现并通过等价性样例验证。
+
 当前 GuardEngine 协议 `guard.partme.ai/v1alpha1` 与拟议[集成信封](docs/integration-contract.md) 分离：它支持严格的 GuardContract/GuardFacts/GuardReport 和精确 `forbid_relation`，不支持 FlowGuard 阶段或审批对象。报告未签名；重算验证一致性，不证明来源或授权。
 
 ## 规划 CLI——尚不可运行

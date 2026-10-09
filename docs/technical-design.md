@@ -27,7 +27,7 @@ openspec/changes/
 | StageRecord | 阶段号、项目/功能归属、源路径/摘要、声明状态、版本、依赖/继承边、证据和批准引用 |
 | EvidenceObligation | 守卫、规则摘要、精确调用绑定、分析器及覆盖要求、必需性、失效条件；先冻结后执行 |
 | ApprovalRef | 外部不可变记录标识；控制器解析其主体、权限、目的、目标摘要、范围、期限、撤销状态 |
-| GateDecision | 指定动作、冻结义务摘要、观察证据、未解决缺口、作用范围与决策 |
+| GateDecision | 指定动作、冻结义务摘要、观察证据、未解决缺口与动作资格；独立领域附件，不覆盖任何 GuardReport/信封 decision |
 | AuditEvent | 输入/状态版本、因果引用、失效或转换理由、控制器身份、执行对账引用 |
 
 这些对象不是 `guard.partme.ai/v1alpha1` 的可接受字段。批准结构不设置可由调用者自证的 `actorVerified` 布尔值。ProjectStageDocument/FeatureStageDocument 只引用原生文档，不复制需求正文。
@@ -36,7 +36,11 @@ openspec/changes/
 
 当前共享引擎只接受严格 GuardContract YAML、GuardFacts JSON、GuardReport JSON，精确 `forbid_relation` 和 enforcement `enforce/review/advise`，未知字段拒绝；引擎不解析阶段图或签发授权。partial facts 为 BLOCK/INDETERMINATE；complete 限于声明分析范围。报告未签名，verify 是重算一致性校验，不是可信身份校验。本仓无引擎源码，以上为跨仓冻结契约；接入前需固定引擎版本并执行真实契约测试。
 
-使用独立草案 [GuardRunEnvelope](integration-contract.md)，版本 `guard.integration/v1alpha1`；精确字段以该文件为准。本设计只要求：运行状态 completed/error/cancelled 与 decision 分离，失败 decision 为空；调用绑定含 repoId/taskId/worktreeId/requirementIds/candidateOid/baseOid/mergeGroupId；包含 contract/facts/report 摘要引用、分析器/覆盖、审批引用与诊断。错误不能伪装为合法 GuardReport。信封版本、crate semver、策略修订各自演进，不能混为一个版本号。
+使用独立草案 [GuardRunEnvelope](integration-contract.md)，版本 `guard.integration/v1alpha1`；精确字段以该文件为准。本设计只要求：运行状态 completed/error/cancelled 与 decision 分离，失败 decision 为空；调用绑定含 repoId/taskId/worktreeId/requirementIds/candidateOid/baseOid/mergeGroupId；包含 contract/facts/report 摘要引用、分析器/覆盖、审批引用与诊断。在 repo/candidate/base 等必需绑定尚无法解析时，不构造字段缺失或伪造身份的 GuardRunEnvelope：CLI 返回退出 4 和 stderr 诊断，未来传输错误对象须单独定版。完整绑定已建立后的运行错误才可形成 error 信封。错误不能伪装为合法 GuardReport。信封版本、crate semver、策略修订各自演进，不能混为一个版本号。
+
+目标 `gate check` 使用 FlowGuard 自己的受保护合同、阶段义务 facts 和新生成的 GuardReport；信封 decision 必须与这份报告一致。下游报告通过领域附件引用，全部保持不可变，包括外部批准之后的 REQUIRE_APPROVAL。新的 FlowGuard 运行可确认待审义务已由可信批准满足，并获得不同的流程规则结论；这不是将旧专业报告改成 ALLOW。动作资格 GateDecision 使用 `artifacts.domain` 引用，控制器授权另行记录，不新增共享信封字段。退出 0 仅表明这次流程检查为 ALLOW，不代表所有下游报告均 ALLOW，更不代表已执行或已授予执行权。
+
+投影契约须先固定版本和 fixture：每个必需缺口都有可匹配的精确关系；必要证据缺失/失效对应 enforce，不完整分析对应 partial 或错误；仅待审义务缺审批对应 review。真实批准可在**新**事实快照中使待审义务不再缺失，但不能消除下游 enforce 违例或未知覆盖。批准提供方不可用属于验证错误，不能伪造成已确认的“无批准”。引擎只计算这些受保护关系，不认证或签发批准。未建立可靠投影时该能力未支持，禁止用空事实默认通过。
 
 未来 FlowGuard check 映射：`0` ALLOW，`2` BLOCK，`3` REQUIRE_APPROVAL，`4` 输入/运行/验证错误；拟用 stdout JSON、stderr 诊断。取消在集成层使用 cancelled，CLI 暂拟退出 4，待实现时固定并测量。无现有 `--report`，不提供其行为保证。CodeGuard 旧 CLI 保留历史退出码，通过显式、版本化适配器归一化，不静默修改其外部行为。
 
@@ -48,7 +52,7 @@ openspec/changes/
 4. **Freeze**：从受保护策略计算适用阶段、专业守卫、覆盖和批准要求，冻结摘要；provider 缺失也保留其义务。
 5. **Gather**：按独立运行绑定收集专业报告和摘要，对每个 provider 保留 complete/partial/error/cancelled 状态；绝不通过删除失败项缩减义务。
 6. **Validate**：重算报告一致性；核对来源通道、候选/基底/合并组、规则/分析器/覆盖和基线；控制器独立验证批准身份、范围、期限、撤销。Code review 文本成功不能替代专业技术证据。
-7. **Decide**：工具失败/取消产生无放行决策的错误/取消信封；必要证据缺失或不完整、范围不符、违规或失效为 BLOCK；仅审批不足而技术条件齐备时 REQUIRE_APPROVAL；全部满足才 ALLOW。
+7. **Project/evaluate**：保留所有下游报告；对本次流程义务生成兼容事实和新的 FlowGuard 引擎报告。工具失败/取消产生空 decision 的错误/取消信封；必要证据缺失或不完整、范围不符、enforce 违规或失效为 BLOCK；仅审批不足而技术条件齐备时 REQUIRE_APPROVAL；全部满足才 ALLOW。信封及 CLI 反映这份新报告，动作资格是独立领域结果；控制器仍需授权。
 8. **Commit state**：以 expected state version + 输入摘要执行条件写入；冲突重新绑定重算，不覆盖并发结果。默认 check 只读，写事件或文档的命令未来需单独定义授权。
 9. **Execute externally**：可信控制器在执行瞬间再次核对候选、基线与审批状态，宿主执行授权动作并审计。未知执行结果先对账；FlowGuard 不自行写 Git refs 或发布。
 
@@ -78,7 +82,7 @@ openspec/changes/
 
 | 类别 | 结果 | 可执行恢复 |
 |---|---|---|
-| INPUT_INVALID / GRAPH_CYCLE / BINDING_AMBIGUOUS | runStatus error、空 decision | 修正输入/依赖，重新发现 |
+| INPUT_INVALID / GRAPH_CYCLE / BINDING_AMBIGUOUS | 完整绑定后为 error/空 decision；绑定前为独立诊断及退出 4，无 GuardRunEnvelope | 修正输入/依赖，重新发现 |
 | PROVIDER_MISSING / EVIDENCE_STALE / COVERAGE_INCOMPLETE | 已完成资格检查为 BLOCK；真实工具故障为 error | 安装经核实 provider 或针对当前候选重跑 |
 | APPROVAL_MISSING | 技术条件满足时 REQUIRE_APPROVAL | 通过真实宿主请求批准 |
 | APPROVAL_INVALID / BASELINE_CHANGED | BLOCK | 刷新外部记录/基线，重新验证依赖 |
@@ -113,7 +117,7 @@ MCP 首版仅暴露只读发现/状态/检查，不暴露任意 shell 或签发�
 |---|---|---|
 | F0 兼容调查 | 外部固定 SHA/许可/入口清单、十阶段真实样例、差异表 | 每个保留行为都指向已检查源码或样例；所有未知项显式记录；无资料则不宣称兼容 |
 | F1 来源与图 | 版本化 schema、只读 resolver、DAG、基线快照 | 10 阶段和项目/功能布局全覆盖；缺文档、循环、歧义、越界路径均拒绝；重复输入得到相同快照 |
-| F2 证据与审批 | 冻结义务、专业适配器、可信批准查询 | 无 provider、partial、错误、伪造 accepted、过期/撤销、范围不符均不 ALLOW；只有技术完整的缺审批返回 REQUIRE_APPROVAL |
+| F2 证据与审批 | 冻结义务、专业适配器、可信批准查询、FlowGuard 事实投影 | 无 provider、partial、错误、伪造 accepted、过期/撤销、范围不符均不 ALLOW；只有技术完整的缺审批返回 REQUIRE_APPROVAL；下游 review 报告在批准前后字节不变，新 FlowGuard 信封 decision 等于自身报告；控制器授权不改写任一技术报告 |
 | F3 并发与失效 | CAS、幂等、依赖失效、精确队列候选 | A/B 隔离；旧结果迟到不覆盖；candidate/base/group/规则/分析器/覆盖/基线逐项变化均失效；M 重算而非复用分支 PASS |
 | F4 宿主与迁移 | 真实 required check、权限/审计/恢复、兼容适配器 | 禁用 Hook 无法绕过；执行前撤销批准被拒；未知执行先对账；N/N-1 支持矩阵逐项测试后才承诺兼容 |
 

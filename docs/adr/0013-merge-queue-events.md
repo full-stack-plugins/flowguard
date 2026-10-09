@@ -35,3 +35,24 @@ The original uncompiled API draft remains under docs/drafts without being presen
 3. 复用已有候选比较及 `revalidate`，每次消费重新取当前事件/撤销状态；在新适配器上验证错误issuer、替换body/reference、跨scope、旧/同序事件、过期、撤销和来源不可用。没有认证结果时保持拒绝，不能仅将错误转换为 fixture 记录。
 
 上述三项当前没有实现；现有 trait 是扩展点，不能被描述为已有真实 connector。选型/信任材料尚未给定使该具体接线无法确定，不代表所有本地代码都属于外部阻塞。确认某个只读测试来源后，可以只实现和验证这一种适配器；宿主 required-check 的关闭hook/弱化策略/撤销后合入测试仍属于独立的5.4范围。
+
+## 2026-10-09 GitHub 只读前提核验
+
+根线程于 `2026-10-09T16:38:24.954659+00:00` 对
+`full-stack-plugins/flowguard` 完成一次只读检查，原始结果保存在
+`/workspace/guard-implementation-ledger/flowguard-host-readonly-prerequisites.json`：
+
+- `gh api repos/full-stack-plugins/flowguard` 成功：default_branch 为 `main`，`allow_auto_merge=false`；返回的 repository permissions 包含 admin/pull 等 true。这不证明当前 integration 能读取所有保护配置，也不构成远端写授权。
+- `gh api repos/full-stack-plugins/flowguard/rulesets` 成功并返回 `[]`。
+- `gh api repos/full-stack-plugins/flowguard/branches/main/protection` 返回 HTTP 403：`Resource not accessible by integration`。
+
+因此已确认仓库读取可用，但 main 分支保护配置不可读；不能由空 rulesets
+断言 main 没有分支保护，也不能由 `allow_auto_merge=false` 推断队列配置或
+required-check 的实际强制效果。本次未取得真实 authenticated M1/M2 事件，
+未执行保护绕过实验，也未修改远端任何配置、分支或检查。
+
+后续具体需要补充：让所用 integration 能只读查看目标分支保护及 queue 配置的
+授权，以及选定测试 controller、事件版本和事件到 repo/queue/task/worktree/
+requirements 的受保护映射。可通过连接权限或受控会话提供，无需发送原始 token。
+在这些条件具备前，真实事件适配与保护宿主验证仍未完成；当前禁止远端写的范围
+保持不变，不自动启用队列、修改保护规则或尝试合入。

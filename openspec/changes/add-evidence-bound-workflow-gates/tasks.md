@@ -52,7 +52,7 @@
 - [x] 2.2 在 `src/baseline.rs` 实现不可变继承，`tests/baseline_inheritance.rs` 比较 A/B 独立范围、共享 02/07、latest 替换、父摘要变化与发布 10 的功能 09 集合。验收：只共享确切有效引用，不能复制 accepted 或隐式换父版本。对应 **Versioned stage graph and immutable inheritance**、**Dependency-aware eligibility invalidation**。
 - [x] 2.3 在 `src/stage_transition.rs` 实现声明/资格分离的转换表；`tests/stage_transition.rs` 覆盖全部七状态、伪 accepted、未批准 skipped 和 invalidated 重新提交。验收：非法边均拒绝，阶段状态不是技术/执行状态。对应 **Explicit stage transitions and remediation scope**。
 - [x] 2.4 在 `docs/adr/approval-port.md` 与 `src/approvals.rs` 固定只读批准端口、identity/action/scope/digest/expiry/revocation 校验和刷新策略；`tests/approval_observation.rs` 注入过期、撤销、越权、布尔自证、服务故障。验收：故障不等于确认无批准，生产 provider 选择仍需 GE-TRUST 与独立审查。对应 **Authenticated approval observations**。
-- [ ] 2.5 在 `src/action_policy.rs` 定义受保护阶段适用性、TDD 前置测试例外及修复动作范围；`tests/action_policy.rs` 覆盖提交受阻但授权补测试可用、未授权 skip、候选缩减适用阶段。验收：合法修复不被全局封禁，交付资格不因此放松。对应 **Explicit stage transitions and remediation scope**、**Frozen domain evidence obligations**。
+- [x] 2.5 在 `src/action_policy.rs` 定义受保护阶段适用性、TDD 前置测试例外及修复动作范围；`tests/action_policy.rs` 覆盖提交受阻但授权补测试可用、未授权 skip、候选缩减适用阶段。验收：合法修复不被全局封禁，交付资格不因此放松。对应 **Explicit stage transitions and remediation scope**、**Frozen domain evidence obligations**。
 - [x] 2.6 在 `adapters/specguard/mod.rs` 接入 SG-BASELINE 稳定 requirement IDs、固定批准基线和义务引用；`tests/specguard_baseline_contract.rs` 保存真实版本样例并覆盖范围缺失/版本不符。验收：真实与模拟样例标记分离，不复制规格正文，无 SG 能力时相应门禁保持未满足。对应 **Versioned stage graph and immutable inheritance**、**Frozen domain evidence obligations**。
 
 ## 3. F2 专业证据与自身引擎报告

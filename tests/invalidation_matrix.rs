@@ -546,37 +546,111 @@ fn per_node_observation_rollback_is_rejected_even_if_snapshot_time_advances() {
 
 #[test]
 fn competing_batches_have_one_atomic_winner() {
-    let (_dir,b)=binding();let u=upstream(&b,guardengine::Enforcement::Advise,false);let g=graph(true);
-    let plans:BTreeMap<_,_>=g.nodes().keys().map(|id|(id.clone(),plan(&b,&u,id))).collect();let contexts:BTreeMap<_,_>=plans.keys().map(|id|(id.clone(),context())).collect();
-    let store=MemoryRunStore::default();for p in plans.values(){store.advance(p,0).unwrap();}
-    let old=snapshot(&g,&plans,&contexts,None);let current=snapshot(&g,&plans,&contexts,Some("a"));let delta=old.changes(&current,NOW).unwrap();
-    let barrier=std::sync::Barrier::new(2);
-    let results=std::thread::scope(|scope|{
-        let a=scope.spawn(||{barrier.wait();delta.apply(&store)});let b=scope.spawn(||{barrier.wait();delta.apply(&store)});
-        [a.join().unwrap(),b.join().unwrap()]
+    let (_dir, b) = binding();
+    let u = upstream(&b, guardengine::Enforcement::Advise, false);
+    let g = graph(true);
+    let plans: BTreeMap<_, _> = g
+        .nodes()
+        .keys()
+        .map(|id| (id.clone(), plan(&b, &u, id)))
+        .collect();
+    let contexts: BTreeMap<_, _> = plans.keys().map(|id| (id.clone(), context())).collect();
+    let store = MemoryRunStore::default();
+    for p in plans.values() {
+        store.advance(p, 0).unwrap();
+    }
+    let old = snapshot(&g, &plans, &contexts, None);
+    let current = snapshot(&g, &plans, &contexts, Some("a"));
+    let delta = old.changes(&current, NOW).unwrap();
+    let barrier = std::sync::Barrier::new(2);
+    let results = std::thread::scope(|scope| {
+        let a = scope.spawn(|| {
+            barrier.wait();
+            delta.apply(&store)
+        });
+        let b = scope.spawn(|| {
+            barrier.wait();
+            delta.apply(&store)
+        });
+        [a.join().unwrap(), b.join().unwrap()]
     });
-    assert_eq!(results.iter().filter(|r|r.is_ok()).count(),1);
-    for id in ["a","b","release"] {assert_eq!(store.advance(&plans[id],2).unwrap(),3);}
-    assert_eq!(store.advance(&plans["other"],1).unwrap(),2);
+    assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 1);
+    for id in ["a", "b", "release"] {
+        assert_eq!(store.advance(&plans[id], 2).unwrap(), 3);
+    }
+    assert_eq!(store.advance(&plans["other"], 1).unwrap(), 2);
 }
 
 struct AllocObserver;
 thread_local! {static ALLOC_ON:std::cell::Cell<bool>=const{std::cell::Cell::new(false)};static MAX_ALLOCATION:std::cell::Cell<usize>=const{std::cell::Cell::new(0)};}
-fn note_allocation(n:usize){let _=ALLOC_ON.try_with(|on|{if on.get(){let _=MAX_ALLOCATION.try_with(|m|m.set(m.get().max(n)));}});}
+fn note_allocation(n: usize) {
+    let _ = ALLOC_ON.try_with(|on| {
+        if on.get() {
+            let _ = MAX_ALLOCATION.try_with(|m| m.set(m.get().max(n)));
+        }
+    });
+}
 unsafe impl std::alloc::GlobalAlloc for AllocObserver {
-    unsafe fn alloc(&self,l:std::alloc::Layout)->*mut u8{note_allocation(l.size());unsafe{std::alloc::GlobalAlloc::alloc(&std::alloc::System,l)}}
-    unsafe fn dealloc(&self,p:*mut u8,l:std::alloc::Layout){unsafe{std::alloc::GlobalAlloc::dealloc(&std::alloc::System,p,l)}}
-    unsafe fn realloc(&self,p:*mut u8,l:std::alloc::Layout,n:usize)->*mut u8{note_allocation(n);unsafe{std::alloc::GlobalAlloc::realloc(&std::alloc::System,p,l,n)}}
+    unsafe fn alloc(&self, l: std::alloc::Layout) -> *mut u8 {
+        note_allocation(l.size());
+        unsafe { std::alloc::GlobalAlloc::alloc(&std::alloc::System, l) }
+    }
+    unsafe fn dealloc(&self, p: *mut u8, l: std::alloc::Layout) {
+        unsafe { std::alloc::GlobalAlloc::dealloc(&std::alloc::System, p, l) }
+    }
+    unsafe fn realloc(&self, p: *mut u8, l: std::alloc::Layout, n: usize) -> *mut u8 {
+        note_allocation(n);
+        unsafe { std::alloc::GlobalAlloc::realloc(&std::alloc::System, p, l, n) }
+    }
 }
 #[global_allocator]
-static ALLOCATOR:AllocObserver=AllocObserver;
+static ALLOCATOR: AllocObserver = AllocObserver;
 #[test]
 fn oversized_prepared_policy_is_rejected_before_work_identity_copy_or_hash() {
-    let (_dir,b)=binding();let u=upstream(&b,guardengine::Enforcement::Advise,false);let g=graph(true);
-    let f=frozen(&b,&u,false);let scope=obligation_scope(f.obligations().first().unwrap());let mut p=policy(&u);p.action="a".into();p.producer_principals.insert("s".repeat(4*1024*1024));
-    let oversized=prepare_gate(&b,&f,BTreeMap::from([(scope,p)]),GateRequest{run_id:"a".into(),action:"a".into(),started_at:TIME.into()}).unwrap();
-    let plans:BTreeMap<_,_>=g.nodes().keys().map(|id|(id.clone(),plan(&b,&u,id))).collect();let c=context();
-    let inputs:Vec<_>=plans.iter().map(|(id,p)|NodeInput{node_id:id,gate:if id=="a"{&oversized}else{p},generation:1,context:&c,freshness:Freshness{observed_at:NOW,expires_at:NOW+60,revoked:false,artifacts_available:true}}).collect();
-    MAX_ALLOCATION.with(|m|m.set(0));ALLOC_ON.with(|on|on.set(true));let result=FrozenInputs::freeze(&g,&inputs,NOW);ALLOC_ON.with(|on|on.set(false));
-    assert!(result.is_err());assert!(MAX_ALLOCATION.with(|m|m.get())<4096);
+    let (_dir, b) = binding();
+    let u = upstream(&b, guardengine::Enforcement::Advise, false);
+    let g = graph(true);
+    let f = frozen(&b, &u, false);
+    let scope = obligation_scope(f.obligations().first().unwrap());
+    let mut p = policy(&u);
+    p.action = "a".into();
+    p.producer_principals.insert("s".repeat(4 * 1024 * 1024));
+    let oversized = prepare_gate(
+        &b,
+        &f,
+        BTreeMap::from([(scope, p)]),
+        GateRequest {
+            run_id: "a".into(),
+            action: "a".into(),
+            started_at: TIME.into(),
+        },
+    )
+    .unwrap();
+    let plans: BTreeMap<_, _> = g
+        .nodes()
+        .keys()
+        .map(|id| (id.clone(), plan(&b, &u, id)))
+        .collect();
+    let c = context();
+    let inputs: Vec<_> = plans
+        .iter()
+        .map(|(id, p)| NodeInput {
+            node_id: id,
+            gate: if id == "a" { &oversized } else { p },
+            generation: 1,
+            context: &c,
+            freshness: Freshness {
+                observed_at: NOW,
+                expires_at: NOW + 60,
+                revoked: false,
+                artifacts_available: true,
+            },
+        })
+        .collect();
+    MAX_ALLOCATION.with(|m| m.set(0));
+    ALLOC_ON.with(|on| on.set(true));
+    let result = FrozenInputs::freeze(&g, &inputs, NOW);
+    ALLOC_ON.with(|on| on.set(false));
+    assert!(result.is_err());
+    assert!(MAX_ALLOCATION.with(|m| m.get()) < 4096);
 }

@@ -1,14 +1,8 @@
-# WIP: FG4.3 local invalidation API and boundaries
+# FG4.3 local invalidation API and boundaries
 
-**Preservation commit only; task 4.3 remains incomplete and unchecked.** The current implementation has not been compiled or tested. Ten tests are authored, but only earlier missing-API RED and two assertions against a compiling no-op stub were executed. Those RED results do not validate the implementation below. No GREEN or acceptance is claimed.
+The process-local snapshot and atomic withdrawal slice is verified by ten invalidation tests, including observation refresh/rollback, dependency closure, batch competition and pre-copy budgets. Task 4.3 remains incomplete and unchecked pending current-publication consumption integration and independent review.
 
-Known outstanding issues:
-
-- Comparing entire `Freshness` currently invalidates work when only `observed_at` advances; the intended no-op behavior below is not implemented correctly.
-- Per-node observation rollback is not yet rejected separately from snapshot-time rollback.
-- Clearing MemoryRunStore current does not revoke detached GateRun/QualifiedStage objects. Current-publication validation is not automatically connected to every qualification consumption path. A controller must still check current and perform fresh GE/provider validation; a future interface solution has not been implemented.
-
-The remainder describes the proposed design, not verified guarantees. Work was paused before current-source compilation, focused tests, full regression or independent review. No new execution or production authentication is enabled.
+Clearing MemoryRunStore current does not revoke detached GateRun/QualifiedStage objects. A controller must check current publication and perform fresh GE/provider validation. No execution or production authentication is enabled.
 
 FrozenInputs is an opaque controller snapshot of a bounded StageGraph and an exact mapping of every node to a real prepared PendingGate, generation, ancillary ContextDigests and Freshness. It does not accept returned success reports as expected inputs. Full work comes from existing PendingGate.store_identity (full binding/policies/frozen obligations/required coverage/action/mapping/runtime versions); graph/context identity is independently protected by the controller. Unique full store targets prevent ambiguity between graph nodes. No credentials or qualification receipts are produced.
 

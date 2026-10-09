@@ -129,7 +129,9 @@ impl FrozenInputs {
             {
                 return Err(InvalidationError::Invalid);
             }
-            bytes = bytes.checked_add(bounded(i.context, 1024)? + i.node_id.len()).ok_or(InvalidationError::Budget)?;
+            bytes = bytes
+                .checked_add(bounded(i.context, 1024)? + i.node_id.len())
+                .ok_or(InvalidationError::Budget)?;
             bytes = bytes
                 .checked_add(
                     i.gate
@@ -173,11 +175,16 @@ impl FrozenInputs {
         for id in self.nodes.keys().chain(current.nodes.keys()) {
             let changed = match (self.nodes.get(id), current.nodes.get(id)) {
                 (Some(a), Some(b)) => {
+                    if b.freshness.observed_at < a.freshness.observed_at {
+                        return Err(InvalidationError::ClockRollback);
+                    }
                     a.work.digest != b.work.digest
                         || a.work.run_id != b.work.run_id
                         || a.generation != b.generation
                         || a.context != b.context
-                        || a.freshness != b.freshness
+                        || a.freshness.expires_at != b.freshness.expires_at
+                        || a.freshness.revoked != b.freshness.revoked
+                        || a.freshness.artifacts_available != b.freshness.artifacts_available
                         || a.freshness.invalid(now)
                         || b.freshness.invalid(now)
                         || self.graph.nodes().get(id) != current.graph.nodes().get(id)

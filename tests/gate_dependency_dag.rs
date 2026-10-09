@@ -344,3 +344,36 @@ fn missing_dag_reader_cannot_be_replaced_by_executor_availability() {
         );
     }
 }
+
+#[test]
+fn baseline_time_advance_closes_preview_even_when_review_approval_lives_longer() {
+    let fixture = Fixture::new();
+    let (read_order, captures) = read_dependencies(&fixture);
+    let evidence: Vec<_> = captures
+        .iter()
+        .enumerate()
+        .map(|(i, c)| c.evidence(&fixture.scopes[&read_order[i]]))
+        .collect();
+    let authority = FixtureAuthority::new();
+    authority.native.borrow_mut().baseline_auth.expires_at = NOW + 1;
+    authority
+        .native
+        .borrow_mut()
+        .approval
+        .as_mut()
+        .unwrap()
+        .validity
+        .expires_at = i64::MAX;
+    let pending = fixture.pending();
+    let controller = readonly_controller::ReadOnlyController::freeze(
+        fixture.binding.binding(),
+        &pending,
+        &authority,
+    );
+    let run = controller.run(pending, &evidence, NOW, TIME);
+    assert_eq!(run.envelope().decision, Some(guardengine::Decision::Allow));
+    let original = serde_json::to_vec(run.envelope()).unwrap();
+    assert!(controller.preview(&run, &fixture.binding.binding().candidate_oid, NOW));
+    assert!(!controller.preview(&run, &fixture.binding.binding().candidate_oid, NOW + 2));
+    assert_eq!(original, serde_json::to_vec(run.envelope()).unwrap());
+}

@@ -61,7 +61,7 @@ FLOWGUARD_JOINT_OUTPUT=/absolute/new-capture-directory \
 For an archived source checkout sharing the original target, set
 `FLOWGUARD_JOINT_GENERATOR` and `FLOWGUARD_JOINT_INVALIDATION` to the explicitly
 built example paths. Fixed consumer FlowGuard source is `56a2c9576caf382a6bb5f716c707c77c94606599`,
-SHA256 `b49af236e8fdd3e41742d8c4168bf0dffce7cb463ea9a049fc5bc6b0708a5048`.
+SHA256 `9d0dadea6bcafce083a487548ffb4b082945bfa136f693760e7403de2b3fbf24`.
 CG native `f5661d51dd1b2629f3b87b726fb09a9060ce7958`, projection
 `72d80ae453c0380ad7061c10847595c5a4ac1736` and Ruff executable hashes are enforced
 by the capture runner, preserving the original fixture tool versions.

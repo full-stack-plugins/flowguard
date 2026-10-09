@@ -8,7 +8,7 @@ DEST=Path(sys.argv[1]).resolve();DEST.mkdir(parents=True,exist_ok=False)
 REPO=DEST/'repository';shutil.copytree(HERE.parent/'approval-bridge/source',REPO)
 FG=Path(os.environ.get('FLOWGUARD_JOINT_GENERATOR',ROOT/'target/debug/examples/generate_joint'))
 TG=Path('/workspace/guard-implementation-ledger/fixed-tools/flowguard-joint-testguard-fixture')
-CONSUMER=Path('/workspace/guard-implementation-ledger/fixed-tools/56a2c9576caf382a6bb5f716c707c77c94606599/flowguard')
+CONSUMER=Path('/workspace/guard-implementation-ledger/fixed-tools/flowguard-independent-56a2c95/flowguard')
 OUT=DEST
 NATIVE=Path('/workspace/guard-implementation-ledger/codeguard-ruff-native-capture/codeguard-f5661d5')
 CG=Path('/workspace/guard-implementation-ledger/codeguard-ruff-cli-capture/codeguard')
@@ -31,7 +31,7 @@ def run(label,argv,expected=0):
  return p
 
 FIXED[str(TG)]='d9547e4ceba0770c16d64666f1ef9294bb5900932eebe06d38fd4e5d921b4a16'
-FIXED[str(CONSUMER)]='b49af236e8fdd3e41742d8c4168bf0dffce7cb463ea9a049fc5bc6b0708a5048'
+FIXED[str(CONSUMER)]='9d0dadea6bcafce083a487548ffb4b082945bfa136f693760e7403de2b3fbf24'
 for path,digest in FIXED.items():assert sha(Path(path).read_bytes())==digest,path
 ENV['GIT_CONFIG_GLOBAL']='/dev/null'
 def write(path,value):path.write_text(json.dumps(value,separators=(',',':')))

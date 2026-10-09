@@ -3,7 +3,7 @@
 import copy,hashlib,json,os,shutil,subprocess,sys
 from pathlib import Path
 DEST=Path(sys.argv[1]).resolve();repo=DEST/'repository'
-binary=Path('/workspace/guard-implementation-ledger/fixed-tools/56a2c9576caf382a6bb5f716c707c77c94606599/flowguard')
+binary=Path('/workspace/guard-implementation-ledger/fixed-tools/flowguard-independent-56a2c95/flowguard')
 NOW=2_000_000_000
 NAMES=['archguard','codeguard','testguard','gitguard','specguard']
 raw_digest=lambda b:'sha256:'+hashlib.sha256(b).hexdigest()

@@ -119,3 +119,7 @@ Task5.2 local slice adds bounded read-only parsing of the surveyed exact legacy 
 ## Legacy parser allocation review fix (review pending)
 
 Root's independent2MiB delimiter-row probe reproduced a32MiB column-vector allocation before ignoring an unknown field. Replaced full split collection with borrowed field/value iteration and one third-column check. Existing ignore-unknown/reject-known-extra semantics remain. Real allocator regression covers both inputs; maximum observed allocation is4MiB for bounded source buffering, compared with32MiB before. Pinned full72-test suite plus unchanged original independent probe pass (73 total), with Clippy/fmt checks. No task acceptance added;5.2 remains pending independent fix review.
+
+## Legacy differential independent acceptance registration
+
+Root closed allocation P2 at `7b70bda` and accepted local **5.2**, based on `/workspace/guard-implementation-ledger/flowguard-legacy-independent-review.md`:72 product tests plus unchanged original allocator probe pass; actual15-read/49-transition legacy capture reproduces exact fixture SHA. Accepted total **12/30**. Scope is fixed-revision declaration differential with unsupported migration, not complete legacy CLI/host compatibility or authorization. Earlier pending-review statements are historical.

@@ -131,3 +131,10 @@ Root accepted local **3.2** at `ef916d8`, based on `/workspace/guard-implementat
 ## Stage qualification independent acceptance registration
 
 Root accepted local **2.3** at `24ea862`, based on `/workspace/guard-implementation-ledger/flowguard-stage-independent-review.md`:88 tests plus an independent18-node shared-DAG budget probe, Clippy/fmt/OpenSpec pass. Accepted total **14/30**. The probe rejects at1024 visits after113 seconds; this is a work bound, not a latency SLA. Scope is protected local controller qualification; production authority remains external.
+
+
+## Reviewed immutable inheritance acceptance
+
+Task 2.2 accepted at `e68b93082b621d2fbf0da60a144e3b44dd0998e7` after the independent 17MiB metadata P2 was closed. The original three probes pass unchanged; 98 maintained tests plus two additional boundary probes pass. Borrowed metadata/count/aggregate and serialization budgets run before hashing/cloning full candidates. Real committed 02/07 parent references, independent child requirement scopes, current approval refresh and exact typed09 prerequisite composition remain intact. Historical parents are explicit immutable references; no implicit latest substitution is permitted.
+
+This acceptance covers the local controller inheritance/composition profile, not production SG authority, stage10 qualification or release execution. Independent allocation probes establish bounded call-site behavior, not global RSS. Evidence: cloud ledger `flowguard-baseline-budget-independent-review.md` and original `flowguard-baseline-independent-review.md`.

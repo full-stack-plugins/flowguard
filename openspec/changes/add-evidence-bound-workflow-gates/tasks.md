@@ -49,7 +49,7 @@
 接口：`build_graph(SourceInventory, StageProfile) -> StageGraph`；`resolve_baseline(BaselineRef, Scope) -> InheritanceSnapshot`；`ApprovalProvider.observe(ApprovalRef, ValidatedBinding, Action) -> VerifiedApprovalObservation | ProviderError`。真实需求 ID/义务导入等待 SG-BASELINE，批准端口此时仅测试替身。
 
 - [x] 2.1 在 `src/dependencies.rs` 建立稳定节点和显式 DAG 校验；`tests/stage_graph.rs` 覆盖十阶段、悬空边、环、重复归属及乱序输入。验收：图排序确定、定位冲突且循环有限结束。对应 **Versioned stage graph and immutable inheritance**。
-- [ ] 2.2 在 `src/baseline.rs` 实现不可变继承，`tests/baseline_inheritance.rs` 比较 A/B 独立范围、共享 02/07、latest 替换、父摘要变化与发布 10 的功能 09 集合。验收：只共享确切有效引用，不能复制 accepted 或隐式换父版本。对应 **Versioned stage graph and immutable inheritance**、**Dependency-aware eligibility invalidation**。
+- [x] 2.2 在 `src/baseline.rs` 实现不可变继承，`tests/baseline_inheritance.rs` 比较 A/B 独立范围、共享 02/07、latest 替换、父摘要变化与发布 10 的功能 09 集合。验收：只共享确切有效引用，不能复制 accepted 或隐式换父版本。对应 **Versioned stage graph and immutable inheritance**、**Dependency-aware eligibility invalidation**。
 - [x] 2.3 在 `src/stage_transition.rs` 实现声明/资格分离的转换表；`tests/stage_transition.rs` 覆盖全部七状态、伪 accepted、未批准 skipped 和 invalidated 重新提交。验收：非法边均拒绝，阶段状态不是技术/执行状态。对应 **Explicit stage transitions and remediation scope**。
 - [x] 2.4 在 `docs/adr/approval-port.md` 与 `src/approvals.rs` 固定只读批准端口、identity/action/scope/digest/expiry/revocation 校验和刷新策略；`tests/approval_observation.rs` 注入过期、撤销、越权、布尔自证、服务故障。验收：故障不等于确认无批准，生产 provider 选择仍需 GE-TRUST 与独立审查。对应 **Authenticated approval observations**。
 - [ ] 2.5 在 `src/action_policy.rs` 定义受保护阶段适用性、TDD 前置测试例外及修复动作范围；`tests/action_policy.rs` 覆盖提交受阻但授权补测试可用、未授权 skip、候选缩减适用阶段。验收：合法修复不被全局封禁，交付资格不因此放松。对应 **Explicit stage transitions and remediation scope**、**Frozen domain evidence obligations**。

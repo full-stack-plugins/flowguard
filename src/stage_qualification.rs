@@ -173,6 +173,7 @@ impl ProtectedStagePlan {
         approvers: BTreeSet<String>,
     ) -> Result<Self, QualificationError> {
         use QualificationError::*;
+        binding.check_budget().map_err(|_| Budget)?;
         for principals in [&producers, &approvers] {
             if principals.is_empty()
                 || principals.len() > 64

@@ -304,3 +304,81 @@ fn approval_purpose_scope_candidate_digest_and_provider_outage_are_not_inheritan
         Err(InheritanceError::Unavailable)
     ));
 }
+
+#[test]
+fn review_oversized_parent_candidate_is_rejected_before_digest_expansion() {
+    let f = fixture();
+    let r = reference(&f, "02-architecture");
+    let mut raw = serde_json::to_value(&f.parent).unwrap();
+    raw["task_id"] = serde_json::json!("x".repeat(17 * 1024 * 1024));
+    let candidate: gitguard::candidate::CandidateSnapshot = serde_json::from_value(raw).unwrap();
+    assert!(
+        FrozenBaseline::from_candidate(&f.repo, &candidate, &r).is_err(),
+        "oversized full parent candidate was accepted and hashed without admission"
+    );
+}
+
+#[test]
+fn parent_candidate_admission_bounds_all_metadata_paths_and_fanout() {
+    let f = fixture();
+    let r = reference(&f, "02-architecture");
+    let parent = FrozenBaseline::from_candidate(&f.repo, &f.parent, &r).unwrap();
+    let a = child(&f, "A");
+    let c = issuer(&parent, &r);
+    let edge = parent
+        .inherit(&a, "fixture-controller", "baseline-owner", &c, 2)
+        .unwrap();
+    for case in 0..9 {
+        let mut raw = serde_json::to_value(&f.parent).unwrap();
+        match case {
+            0 => raw["task_id"] = "x".repeat(257).into(),
+            1 => raw["worktree_id"] = "x".repeat(257).into(),
+            2 => raw["merge_group_id"] = "x".repeat(257).into(),
+            3 => raw["requirement_ids"] = serde_json::json!(["x".repeat(257)]),
+            4 => raw["allowed_paths"] = serde_json::json!([vec![b'x'; 4097]]),
+            5 => {
+                raw["allowed_paths"] = serde_json::json!(
+                    (0..257)
+                        .map(|i| format!("docs/{i:04}").into_bytes())
+                        .collect::<Vec<_>>()
+                )
+            }
+            6 => raw["members"] = serde_json::json!(vec![f.oid.clone(); 65]),
+            7 => {
+                raw["allowed_paths"] = serde_json::json!(
+                    (0..256)
+                        .map(|i| format!("docs/{i:04}/{}", "x".repeat(256)).into_bytes())
+                        .collect::<Vec<_>>()
+                )
+            }
+            _ => {
+                raw["requirement_ids"] =
+                    serde_json::json!((0..4097).map(|i| format!("R{i:04}")).collect::<Vec<_>>())
+            }
+        }
+        let candidate: gitguard::candidate::CandidateSnapshot =
+            serde_json::from_value(raw).unwrap();
+        assert_eq!(
+            FrozenBaseline::from_candidate(&f.repo, &candidate, &r).err(),
+            Some(InheritanceError::InvalidParent),
+            "case {case}"
+        );
+        assert_eq!(
+            edge.consume(&parent, &f.repo, &candidate, &a, &c, 2),
+            Err(InheritanceError::InvalidParent),
+            "case {case}"
+        );
+        let input = InvocationInput {
+            repo_candidates: vec![candidate.repo_id().into()],
+            task_candidates: vec![candidate.task_id().into()],
+            worktree_id: candidate.worktree_id().into(),
+            requirement_ids: candidate.requirement_ids().to_vec(),
+            candidate_oid: candidate.candidate_oid().into(),
+            base_oid: candidate.base_oid().into(),
+        };
+        assert!(
+            bind(&input, &f.repo, &candidate).is_err(),
+            "binding case {case}"
+        );
+    }
+}

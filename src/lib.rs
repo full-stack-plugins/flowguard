@@ -50,3 +50,5 @@ pub mod evidence;
 mod guard_adapters;
 pub mod release;
 pub mod stage_qualification;
+
+mod admission;

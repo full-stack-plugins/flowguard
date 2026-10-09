@@ -18,6 +18,7 @@ pub enum PreBindingDiagnostic {
     BindingMismatch,
     InvalidCandidate,
     DirtySnapshot,
+    InputBudget,
 }
 #[derive(Debug, Clone)]
 pub struct ValidatedBinding {
@@ -25,6 +26,9 @@ pub struct ValidatedBinding {
     candidate_scope_digest: String,
 }
 impl ValidatedBinding {
+    pub(crate) fn check_budget(&self) -> Result<(), ()> {
+        crate::admission::binding(&self.binding)
+    }
     pub fn binding(&self) -> &RunBinding {
         &self.binding
     }
@@ -51,11 +55,12 @@ pub fn bind(
     candidate: &CandidateSnapshot,
 ) -> Result<ValidatedBinding, PreBindingDiagnostic> {
     use PreBindingDiagnostic::*;
-    if input.repo_candidates.len() != 1
-        || input.task_candidates.len() != 1
-        || input.repo_candidates[0].trim().is_empty()
-        || input.task_candidates[0].trim().is_empty()
-    {
+    if input.repo_candidates.len() != 1 || input.task_candidates.len() != 1 {
+        return Err(AmbiguousIdentity);
+    }
+    crate::admission::invocation(input).map_err(|_| InputBudget)?;
+    crate::admission::candidate(candidate).map_err(|_| InputBudget)?;
+    if input.repo_candidates[0].trim().is_empty() || input.task_candidates[0].trim().is_empty() {
         return Err(AmbiguousIdentity);
     }
     if input.worktree_id.trim().is_empty()

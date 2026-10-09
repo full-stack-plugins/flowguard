@@ -190,6 +190,9 @@ fn prepare_with_sources(
     policies: BTreeMap<String, EligibilityPolicy>,
     request: GateRequest,
 ) -> Result<PendingGate, TransportDiagnostic> {
+    binding
+        .check_budget()
+        .map_err(|_| error("gate.binding_budget"))?;
     if frozen.context_digest() != binding.domain_digest()
         || request.action.trim().is_empty()
         || request.action.len() > 128

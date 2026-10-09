@@ -111,6 +111,7 @@ impl FrozenBaseline {
         reference: &BaselineRef,
     ) -> Result<Self, InheritanceError> {
         use InheritanceError::*;
+        crate::admission::candidate(candidate).map_err(|_| InvalidParent)?;
         if reference.requirements.is_empty()
             || reference.requirements.len() > 256
             || reference.requirements.iter().any(|r| r.len() > 256)
@@ -168,6 +169,7 @@ impl FrozenBaseline {
         provider: &impl crate::approvals::ApprovalProvider,
         now: u64,
     ) -> Result<InheritedEdge, InheritanceError> {
+        child.check_budget().map_err(|_| InheritanceError::Child)?;
         let b = child.binding();
         if b.repo_id != self.reference.repo_id
             || b.requirement_ids
@@ -248,6 +250,10 @@ impl InheritedEdge {
         provider: &impl crate::approvals::ApprovalProvider,
         now: u64,
     ) -> Result<(), InheritanceError> {
+        crate::admission::candidate(candidate).map_err(|_| InheritanceError::InvalidParent)?;
+        current_child
+            .check_budget()
+            .map_err(|_| InheritanceError::Child)?;
         if self.parent != parent.digest || self.child != current_child.domain_digest() {
             return Err(InheritanceError::Child);
         }

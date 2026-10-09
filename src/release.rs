@@ -27,6 +27,7 @@ impl ReleasePlan {
         features: &BTreeMap<String, &ProtectedStagePlan>,
     ) -> Result<Self, ReleaseError> {
         use ReleaseError::*;
+        binding.check_budget().map_err(|_| Binding)?;
         if graph.nodes().len() > 64 || features.is_empty() || features.len() > 64 {
             return Err(InvalidPlan);
         }
@@ -88,6 +89,7 @@ impl ReleasePlan {
         provider: &dyn AuthorityProvider,
         now: i64,
     ) -> Result<(), ReleaseError> {
+        current.check_budget().map_err(|_| ReleaseError::Binding)?;
         if current.domain_digest() != self.context {
             return Err(ReleaseError::Binding);
         }

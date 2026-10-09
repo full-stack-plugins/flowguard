@@ -48,3 +48,23 @@ Fixture tests use real committed parent files and native GE GateRuns, plus expli
 synthetic controller authority. Provider identity, trusted time and supplying the
 current protected policy/parent/plan remain controller responsibilities. Existing
 schemas and declaration parsing do not acquire new authority.
+
+## Candidate and context admission budgets
+
+All incoming CandidateSnapshot values are borrowed-preflighted before Git validation,
+cloning or digest allocation, including on inherited-edge consumption. The same
+helper protects bind before creating any ValidatedBinding. Text fields are capped
+at256 bytes, requirements at4096, merge members at64 (64 bytes each), allowed paths
+at256 (4096 bytes each), and aggregate visible metadata/path bytes at64KiB. Counts
+are checked before visiting members. A non-allocating512KiB counting JSON sink also
+bounds private GG schema/object-format strings and escaped/numeric wire expansion
+before validation/hash; no encoded Vec is produced. This limit is an FG admission
+profile, not a claim that all larger native GG inputs are invalid.
+
+InvocationInput uses the same256-byte text/64KiB aggregate/4096-requirement bounds.
+Opaque ValidatedBinding context is checked at inheritance, release, stage-plan and
+gate boundaries before hashing; its only constructor now enforces these budgets.
+Budget failures are prebinding InputBudget diagnostics or domain InvalidParent/
+Child/Binding errors, never a truncated complete result. Existing narrower baseline
+scope limits remain. Allocator tests cover17MiB task/schema/object-format fields;
+metadata/path/count/aggregate tests cover the full visible candidate shape.

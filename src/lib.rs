@@ -55,3 +55,6 @@ pub mod accepted_stage;
 mod admission;
 pub mod transport;
 pub mod invalidation;
+
+#[path = "../adapters/merge_queue/mod.rs"]
+pub mod merge_queue;

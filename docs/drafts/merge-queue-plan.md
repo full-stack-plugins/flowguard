@@ -1,6 +1,8 @@
 # Queue adapter implementation plan — paused draft
 
-Status: **unimplemented, uncompiled, and not accepted**. FG task 4.5 remains incomplete.
+Historical status at preservation commit 1979822: **unimplemented, uncompiled, and not accepted**.
+
+Resumed 2026-10-09: the local fixture-profile implementation now lives in `adapters/merge_queue/mod.rs`, with executable real Git object tests in `tests/queue_candidate.rs`. See `docs/adr/0013-merge-queue-events.md` for verified scope. FG task 4.5 remains incomplete pending independent review; the following paragraphs retain the original paused-state record.
 
 The following is the existing proposed plan, not a report of implemented behavior.
 No merge-queue adapter or library export was written. No queue test was run.

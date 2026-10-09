@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "kind",
+    "profile",
+    "payload",
+    "digest"
+  ],
+  "properties": {
+    "api_version": {
+      "const": "flowguard.accepted-stage/v1alpha1"
+    },
+    "kind": {
+      "const": "StageRecord"
+    },
+    "profile": {
+      "const": "local-controller-observed"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed_state",
+        "stage",
+        "graph",
+        "graph_digest",
+        "plan_digest",
+        "context_digest",
+        "candidate_scope_digest",
+        "work_digest",
+        "binding",
+        "frozen_obligations",
+        "required_scopes",
+        "dependencies",
+        "gate",
+        "envelope",
+        "envelope_digest",
+        "approval_reference",
+        "approval_action",
+        "approval_purpose",
+        "checked_at"
+      ],
+      "properties": {
+        "observed_state": {
+          "const": "accepted"
+        },
+        "stage": {
+          "$ref": "https://flowguard.local/schemas/workflow/v1/stage-record"
+        },
+        "graph": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "https://flowguard.local/schemas/workflow/v1/stage-record"
+          }
+        },
+        "graph_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "plan_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "context_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "candidate_scope_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "work_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "binding": {
+          "$ref": "https://full-stack-plugins.github.io/guardengine/schemas/integration/v1alpha1/guard-run-envelope.schema.json#/properties/binding"
+        },
+        "frozen_obligations": {
+          "$ref": "https://flowguard.local/schemas/workflow/v1/frozen-obligations"
+        },
+        "required_scopes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "dependencies": {
+          "type": "object",
+          "maxProperties": 64,
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "gate": {
+          "$ref": "https://flowguard.local/schemas/gate/v1alpha1/gate-decision"
+        },
+        "envelope": {
+          "$ref": "https://full-stack-plugins.github.io/guardengine/schemas/integration/v1alpha1/guard-run-envelope.schema.json"
+        },
+        "envelope_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "approval_reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "approval_action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "approval_purpose": {
+          "const": "stage.accept"
+        },
+        "checked_at": {
+          "type": "integer"
+        }
+      }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "$comment": "Audit-only local controller observation. Native envelope/binding reference actual GuardEngine schema; Rust loader additionally enforces unique keys, canonical typed digest, exact graph/context/frozen/action/artifact/required scope relations. Never restores QualifiedStage.",
+  "$id": "https://flowguard.local/schemas/accepted-stage/v1alpha1"
+}

@@ -1,0 +1,199 @@
+{
+  "api_version": "flowguard.accepted-stage/v999",
+  "kind": "StageRecord",
+  "profile": "local-controller-observed",
+  "payload": {
+    "observed_state": "accepted",
+    "stage": {
+      "version": "flowguard.workflow/v1",
+      "id": "first",
+      "stage": "01-requirements",
+      "owner": "a",
+      "source_digest": "sha256:a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e",
+      "dependencies": []
+    },
+    "graph": [
+      {
+        "version": "flowguard.workflow/v1",
+        "id": "first",
+        "stage": "01-requirements",
+        "owner": "a",
+        "source_digest": "sha256:a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e",
+        "dependencies": []
+      },
+      {
+        "version": "flowguard.workflow/v1",
+        "id": "second",
+        "stage": "03-solution",
+        "owner": "a",
+        "source_digest": "sha256:16367aacb67a4a017c8da8ab95682ccb390863780f7114dda0a0e0c55644c7c4",
+        "dependencies": [
+          "first"
+        ]
+      }
+    ],
+    "graph_digest": "sha256:a63c3b24ba0550feb6621eae4c9059c95a300d334d59f9d27395e0679bad2a35",
+    "plan_digest": "sha256:638ca6d83fdb23c9c1838d86b393bc8a044bee1dccb2eaa6ccfdea5cec63997e",
+    "context_digest": "sha256:4992fcefe6e64f23f1bc12250daf7bba58a9912502e7028655abed5f702b4a2d",
+    "candidate_scope_digest": "sha256:5d2687b0998fadf7d6b482a0c0f5aa91cb179866100dc713e799020fbf8facc5",
+    "work_digest": "sha256:252d624302de051e221ea3d60c49b5f9d5ddbf028539e002c30c681ce2843ba4",
+    "binding": {
+      "repoId": "repo",
+      "taskId": "task",
+      "worktreeId": "w",
+      "requirementIds": [
+        "A"
+      ],
+      "candidateOid": "4bb1ca0f87dbeb42d6395ed4968850ba5a6f1557",
+      "baseOid": "4bb1ca0f87dbeb42d6395ed4968850ba5a6f1557",
+      "mergeGroupId": null,
+      "sourceSnapshotDigest": "sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be",
+      "baselineDigest": null
+    },
+    "frozen_obligations": {
+      "baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+      "context_digest": "sha256:4992fcefe6e64f23f1bc12250daf7bba58a9912502e7028655abed5f702b4a2d",
+      "digest": "sha256:919936cecdb29ae601a99ef46eff88dfaab95d1d12cf0b050b3dbca54838fefe",
+      "graph_digest": "sha256:a63c3b24ba0550feb6621eae4c9059c95a300d334d59f9d27395e0679bad2a35",
+      "missing_stages": [],
+      "obligations": [
+        {
+          "analyzer_version": "1",
+          "coverage": [
+            "A"
+          ],
+          "guard": "specguard",
+          "rules_digest": "sha256:01159eb168468097a5c352da2ced0af48b84f6eda475c2c1a317e0f661e9ffdf",
+          "stage_id": "first"
+        },
+        {
+          "analyzer_version": "1",
+          "coverage": [
+            "A"
+          ],
+          "guard": "specguard",
+          "rules_digest": "sha256:01159eb168468097a5c352da2ced0af48b84f6eda475c2c1a317e0f661e9ffdf",
+          "stage_id": "second"
+        }
+      ],
+      "version": "flowguard.workflow/v1"
+    },
+    "required_scopes": [
+      "flowguard.action:sha256:4aa686f51799b1b9a022b6d513144122ac482f8da79d2c62db72a4ce237dc62f",
+      "flowguard.frozen:sha256:919936cecdb29ae601a99ef46eff88dfaab95d1d12cf0b050b3dbca54838fefe",
+      "flowguard.obligation:sha256:504d08892b00f4a55b5981b8ac98642e8b2d87a26f0ab0994d72cbdc18b83558",
+      "flowguard.obligation:sha256:c2b9cfa2fe34d0eebe706dc5065e5f741c3e34bac8642a0b292ab4a2168155e1",
+      "flowguard.stage:first",
+      "flowguard.stage:second",
+      "git.scope:sha256:5d2687b0998fadf7d6b482a0c0f5aa91cb179866100dc713e799020fbf8facc5"
+    ],
+    "dependencies": {},
+    "gate": {
+      "apiVersion": "flowguard.gate/v1alpha1",
+      "kind": "GateDecision",
+      "authorityProfile": "advisory",
+      "mappingVersion": "flowguard.gate-mapping/v1alpha1",
+      "action": "stage.accept:sha256:fc9c4bf94bc3e62e5c7a5ef990c02bae498842c22683497b1c74cf2fd9f4777d",
+      "bindingDigest": "sha256:4992fcefe6e64f23f1bc12250daf7bba58a9912502e7028655abed5f702b4a2d",
+      "frozenObligationsDigest": "sha256:919936cecdb29ae601a99ef46eff88dfaab95d1d12cf0b050b3dbca54838fefe",
+      "decision": "ALLOW",
+      "qualification": "eligible",
+      "gaps": [],
+      "report": {
+        "uri": "artifact://flowguard/46abb8efb1151ff053407e33fb55ede989a1189002d1c7fe88c0495f12d83110",
+        "digest": "sha256:46abb8efb1151ff053407e33fb55ede989a1189002d1c7fe88c0495f12d83110",
+        "mediaType": "application/json"
+      },
+      "upstreamReports": [
+        {
+          "uri": "artifact://fixture/report",
+          "digest": "sha256:1c1e4b9bb8667e616a09ea071b3210744fd5c459516b3fba421d27fc1c017ecd",
+          "mediaType": "application/json"
+        }
+      ]
+    },
+    "envelope": {
+      "apiVersion": "guard.integration/v1alpha1",
+      "kind": "GuardRunEnvelope",
+      "runId": "run:stage.accept:sha256:fc9c4bf94bc3e62e5c7a5ef990c02bae498842c22683497b1c74cf2fd9f4777d",
+      "producer": {
+        "guard": "flowguard",
+        "version": "0.1.0",
+        "analyzerId": "flowguard.stage-gates",
+        "analyzerVersion": "0.1.0"
+      },
+      "binding": {
+        "repoId": "repo",
+        "taskId": "task",
+        "worktreeId": "w",
+        "requirementIds": [
+          "A"
+        ],
+        "candidateOid": "4bb1ca0f87dbeb42d6395ed4968850ba5a6f1557",
+        "baseOid": "4bb1ca0f87dbeb42d6395ed4968850ba5a6f1557",
+        "mergeGroupId": null,
+        "sourceSnapshotDigest": "sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be",
+        "baselineDigest": null
+      },
+      "runStatus": "completed",
+      "decision": "ALLOW",
+      "coverage": {
+        "status": "complete",
+        "requiredScopes": [
+          "flowguard.action:sha256:4aa686f51799b1b9a022b6d513144122ac482f8da79d2c62db72a4ce237dc62f",
+          "flowguard.frozen:sha256:919936cecdb29ae601a99ef46eff88dfaab95d1d12cf0b050b3dbca54838fefe",
+          "flowguard.obligation:sha256:504d08892b00f4a55b5981b8ac98642e8b2d87a26f0ab0994d72cbdc18b83558",
+          "flowguard.obligation:sha256:c2b9cfa2fe34d0eebe706dc5065e5f741c3e34bac8642a0b292ab4a2168155e1",
+          "flowguard.stage:first",
+          "flowguard.stage:second",
+          "git.scope:sha256:5d2687b0998fadf7d6b482a0c0f5aa91cb179866100dc713e799020fbf8facc5"
+        ],
+        "observedScopes": [
+          "flowguard.action:sha256:4aa686f51799b1b9a022b6d513144122ac482f8da79d2c62db72a4ce237dc62f",
+          "flowguard.frozen:sha256:919936cecdb29ae601a99ef46eff88dfaab95d1d12cf0b050b3dbca54838fefe",
+          "flowguard.obligation:sha256:504d08892b00f4a55b5981b8ac98642e8b2d87a26f0ab0994d72cbdc18b83558",
+          "flowguard.obligation:sha256:c2b9cfa2fe34d0eebe706dc5065e5f741c3e34bac8642a0b292ab4a2168155e1",
+          "flowguard.stage:first",
+          "flowguard.stage:second",
+          "git.scope:sha256:5d2687b0998fadf7d6b482a0c0f5aa91cb179866100dc713e799020fbf8facc5"
+        ],
+        "missingScopes": []
+      },
+      "artifacts": {
+        "contract": {
+          "uri": "artifact://flowguard/1f81fb45d2e488a4b3378020da6528c6d0c7eeaa995f44fc273bee156b5c32af",
+          "digest": "sha256:1f81fb45d2e488a4b3378020da6528c6d0c7eeaa995f44fc273bee156b5c32af",
+          "mediaType": "application/json"
+        },
+        "facts": {
+          "uri": "artifact://flowguard/a6cdcafe0aa939a4f36f64b82062e4d367a505703168e8b4771238420fc6d8d2",
+          "digest": "sha256:a6cdcafe0aa939a4f36f64b82062e4d367a505703168e8b4771238420fc6d8d2",
+          "mediaType": "application/json"
+        },
+        "report": {
+          "uri": "artifact://flowguard/46abb8efb1151ff053407e33fb55ede989a1189002d1c7fe88c0495f12d83110",
+          "digest": "sha256:46abb8efb1151ff053407e33fb55ede989a1189002d1c7fe88c0495f12d83110",
+          "mediaType": "application/json"
+        },
+        "domain": [
+          {
+            "uri": "artifact://flowguard/4932ac8de8a072a234a4a2e100d63276702974ecb9a18afae390f93c6d4cbf76",
+            "digest": "sha256:4932ac8de8a072a234a4a2e100d63276702974ecb9a18afae390f93c6d4cbf76",
+            "mediaType": "application/json"
+          }
+        ]
+      },
+      "approvalRefs": [],
+      "diagnostics": [],
+      "startedAt": "2026-10-09T00:00:00Z",
+      "finishedAt": "2026-10-09T00:00:00Z",
+      "expiresAt": null
+    },
+    "envelope_digest": "sha256:3a33eaf9438d92be3da131d54c3cf5f15d7d305bb58a1dc3414b1d277a761bcd",
+    "approval_reference": "approval",
+    "approval_action": "stage.accept:sha256:fc9c4bf94bc3e62e5c7a5ef990c02bae498842c22683497b1c74cf2fd9f4777d",
+    "approval_purpose": "stage.accept",
+    "checked_at": 1791504000
+  },
+  "digest": "sha256:4612fc9a83a8b5c0b246600458f5627daab3e92072b68e9f4a231cb4c3b922f3"
+}

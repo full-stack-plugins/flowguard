@@ -51,4 +51,5 @@ mod guard_adapters;
 pub mod release;
 pub mod stage_qualification;
 
+pub mod accepted_stage;
 mod admission;

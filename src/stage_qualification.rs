@@ -354,3 +354,40 @@ impl QualifiedStage<'_> {
         Ok(())
     }
 }
+
+impl QualifiedStage<'_> {
+    /// Refresh live qualification, then export a non-authoritative audit snapshot.
+    #[allow(clippy::too_many_arguments)]
+    pub fn export_snapshot(
+        &self,
+        current: &ProtectedStagePlan,
+        graph: &StageGraph,
+        binding: &ValidatedBinding,
+        frozen: &FrozenObligations,
+        provider: &dyn AuthorityProvider,
+        now: i64,
+    ) -> Result<crate::accepted_stage::AcceptedStageSnapshot, QualificationError> {
+        if !matches!(self.plan.intent.mode, StageMode::Accept) {
+            return Err(QualificationError::Transition);
+        }
+        let export = crate::accepted_stage::Export {
+            graph,
+            binding,
+            frozen,
+            stage: &self.plan.intent.stage,
+            graph_digest: &self.plan.intent.graph_digest,
+            plan_digest: &self.plan.digest,
+            context: &self.plan.context,
+            work: &self.plan.work,
+            required: &self.plan.policy.required_scopes,
+            dependencies: &self.plan.intent.dependencies,
+            run: self.run,
+            approval: self.approval,
+            action: &self.plan.intent.action,
+            now,
+        };
+        export.check().map_err(|_| QualificationError::Binding)?;
+        self.consume(current, provider, now)?;
+        export.finish().map_err(|_| QualificationError::Binding)
+    }
+}

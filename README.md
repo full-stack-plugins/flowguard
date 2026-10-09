@@ -55,3 +55,8 @@ No install/build/test command exists here. The proposed check mapping is exit `0
 ## Design and implementation path
 
 Read the [architecture](docs/architecture.md), [technical design and acceptance plan](docs/technical-design.md), and [draft integration contract](docs/integration-contract.md). Start with a pinned legacy-source inventory and differential fixtures, then implement stage resolution, approval/evidence validation, concurrency control, and protected-host verification. Each phase requires observable negative cases before authority can transfer. No external side effects are enabled by this documentation.
+
+
+## OpenSpec implementation backlog
+
+The incremental [proposal](openspec/changes/add-evidence-bound-workflow-gates/proposal.md), [design](openspec/changes/add-evidence-bound-workflow-gates/design.md), [requirements](openspec/changes/add-evidence-bound-workflow-gates/specs/) and [tasks](openspec/changes/add-evidence-bound-workflow-gates/tasks.md) translate the architecture into pending implementation work. See the [cross-repository dependency roadmap](openspec/guard-roadmap.md) and [structural validation record](openspec/validation-2026-10-09.md). Every new implementation task remains unchecked; this branch adds planning artifacts, not product features. Earlier source-tree inventories and validation limitations describe the inspected baseline or earlier architecture-review stage; this planning stage adds OpenSpec artifacts and separately records actual CLI validation. Existing change ownership and historical completion evidence remain intact.

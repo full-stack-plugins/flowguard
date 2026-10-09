@@ -242,3 +242,37 @@ impl MemoryRunStore {
             .map(|head| head.generation))
     }
 }
+
+impl MemoryRunStore {
+    /// Atomic withdrawal only; the opaque invalidation module supplies exact frozen old work.
+    pub(crate) fn invalidate_batch(&self, heads: &[(WorkIdentity, u64)]) -> Result<(), StoreError> {
+        if heads.is_empty() {
+            return Ok(());
+        }
+        if heads.len() > 256 {
+            return Err(StoreError::Capacity);
+        }
+        let mut state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
+        let mut seen = std::collections::BTreeSet::new();
+        for (work, generation) in heads {
+            if !seen.insert(&work.target) {
+                return Err(StoreError::Invalid);
+            }
+            let head = state.heads.get(&work.target).ok_or(StoreError::Missing)?;
+            if head.generation != *generation || head.digest != work.digest {
+                return Err(StoreError::Stale);
+            }
+            generation.checked_add(1).ok_or(StoreError::Capacity)?;
+        }
+        // No fallible operation remains after the all-head validation pass.
+        for (work, generation) in heads {
+            let head = state
+                .heads
+                .get_mut(&work.target)
+                .expect("validated under same mutex");
+            head.generation = generation + 1;
+            head.published = None;
+        }
+        Ok(())
+    }
+}

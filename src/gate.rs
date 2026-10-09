@@ -653,3 +653,38 @@ pub fn load_gate_decision(bytes: &[u8]) -> Result<GateDecision, &'static str> {
     }
     Ok(domain)
 }
+
+impl PendingGate {
+    /// Borrowed accounting for dependency snapshots before store_identity clones/hash buffers.
+    pub(crate) fn invalidation_budget_bytes(&self) -> Result<usize, ()> {
+        struct Sink(usize);
+        impl std::io::Write for Sink {
+            fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                self.0 = self
+                    .0
+                    .checked_sub(bytes.len())
+                    .ok_or(std::io::ErrorKind::InvalidInput)?;
+                Ok(bytes.len())
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        const MAX: usize = 512 * 1024;
+        let mut sink = Sink(MAX);
+        serde_json::to_writer(
+            &mut sink,
+            &(
+                &self.run_id,
+                &self.binding,
+                &self.binding_digest,
+                &self.frozen_digest,
+                &self.required,
+                &self.action,
+                &self.policies,
+            ),
+        )
+        .map_err(|_| ())?;
+        Ok(MAX - sink.0)
+    }
+}

@@ -148,3 +148,9 @@ Task 1.4 accepted for the existing immutable-checkout local profile after root's
 ## Reviewed accepted-stage audit contract
 
 Task 1.2 accepted at `82793a2725343670a2d36630996216fbe61932d3` for the local-controller-observed audit snapshot. Independent fixed-source Rust1.90 regression passed104 tests and an additional live approval expiry/action/missing/revocation probe. Export is available only from private QualifiedStage, requires exact current graph/binding/frozen inputs, and calls full recursive consume before producing a bounded canonical record. Historical loader checks strict structure and domain/envelope linkage but never restores live qualification. Old graph-node schema remains unchanged. Actual tenfold canonical exports and reordered JSON, tampering, duplicate keys, foreign scope and unavailable authority are covered. Owner mixed-tree runs are supplemental only; acceptance uses the exact archived run. Evidence: cloud ledger `flowguard-accepted-stage-independent-review.md`.
+
+FG 3.6 candidate for independent review: actual pinned four-provider fixtures and
+additive explicitly frozen native baseline coordination are implemented. See
+`fixtures/providers/cross-guard/README.md` and
+`docs/adr/0010-native-specialist-baselines.md`. Fixture identity only; task checkbox
+remains unchanged pending independent review.

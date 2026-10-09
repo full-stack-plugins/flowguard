@@ -6,12 +6,8 @@ pub(crate) fn expected_binding(
     sources: Option<&crate::evidence::ScopedSources>,
     scope: &str,
 ) -> Result<RunBinding, &'static str> {
-    let mut expected = controller.clone();
     if let Some(sources) = sources {
-        expected.source_snapshot_digest = sources
-            .source(scope)
-            .ok_or("missing specialist source pin")?
-            .into();
+        return sources.expected_binding(controller, scope);
     }
-    Ok(expected)
+    Ok(controller.clone())
 }

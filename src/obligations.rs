@@ -27,6 +27,9 @@ pub struct FrozenObligations {
     digest: String,
 }
 impl FrozenObligations {
+    pub fn baseline_digest(&self) -> &str {
+        &self.payload.baseline_digest
+    }
     pub fn context_digest(&self) -> &str {
         &self.payload.context_digest
     }

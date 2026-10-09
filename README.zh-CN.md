@@ -1,4 +1,4 @@
-# Partme FlowGuard — 流程守卫
+# FlowGuard — 流程守卫
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 

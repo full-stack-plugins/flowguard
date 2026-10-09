@@ -1,0 +1,19 @@
+# Actual SG review → FG bridge and five-provider candidate
+
+This is a separate actual fixture; the accepted four-provider corpus is unchanged. `actual/source.bundle` contains both the real baseline commit and changed current candidate. Exact OIDs, producer/tool pins, commands, exits, pre-result protected expectations and artifact hashes are recorded in `actual/PROVENANCE.json`.
+
+The base contains `specs/a.md` requirement `demo:R` and acceptance `demo:A`. Actual SG parsing produces the baseline graph. The fixture baseline authority checks its repository, scope, policy, digest and lifetime. The candidate commits a text change and the compact ApprovedBaseline record. SG baseline-review therefore emits actual REQUIRE_APPROVAL. AG Cargo declarations, qualified CG Ruff F401, actual TG Cargo test and GG candidate governance emit their own native results on that same candidate/base/task/requirements.
+
+TG plan and FG workflow baseline use the exact bytes of the actual SG baseline record, giving the same digest without relabelling. Source snapshots and policy digests remain domain-specific. All expected contracts, bindings, native coverage and protected profiles are prepared before completed evidence. SG snapshot contents are additionally compared with immutable GG commit blobs.
+
+`specguard/original.json` is the original native ProducedRun, including unchanged REQUIRE_APPROVAL. `specguard/envelope.json` is the separate borrowed RunHistory approval attachment view. Its references change the envelope digest, not the decision or engine bytes. Only a separately registered fixture producer record for that new digest can authenticate it. The fixture authority rechecks baseline authentication and approval validity on consumption; it is explicitly not a production provider.
+
+`tests/specguard_approval_bridge.rs` rebuilds the real repository and reruns SG history/attachment, checks original bytes, then consumes all five providers through FlowGuard. FG emits its own technical decision and scope. Expired/revoked/missing/wrong-purpose or wrong-action approvals, old envelope authentication, revoked/expired baseline, actual partial analysis, bound error and cancellation cannot yield approved ALLOW. Each missing required provider yields Partial/BLOCK. No grant, stage execution, release or merge is performed.
+
+## Reproduction
+
+Reuse the fixed sibling source pins listed in provenance (same as the four-provider corpus, plus SG 4560d133). Build FG `--example generate_approval_bridge` and, in pinned TG e2e91471, copy `generate_testguard.rs` as `examples/generate_approval_bridge_tg.rs` and build it. Use the existing shared targets with CARGO_INCREMENTAL=0 and locked/offline builds; no dependencies are installed.
+
+Run `python3 fixtures/providers/approval-bridge/capture.py OUTPUT NEW_WORK_DIRECTORY` with `/workspace/guard-toolchain/env.sh`. The script names the preserved CG/Ruff binaries and validates their hashes. It executes only the trusted fixture, without external Cargo dependencies or build scripts. Original CodeGuard aggregate exit **3** and all original native stdout stay intact.
+
+The exact generator source at initial capture is retained under `actual/capture-sources` and matches recorded hashes. The helper module hash is recorded separately. Later changes add test-only partial-source preparation and formatting; preserved captures are never rewritten. The initial capture console summary said “five producer complete/ALLOW”; actual JSON correctly has four ALLOW and SG REQUIRE_APPROVAL, enforced by tests and the current capture script. Fresh timestamps/run IDs/absolute working paths may differ; regenerate the entire set, never edit native envelopes.

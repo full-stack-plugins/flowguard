@@ -83,6 +83,7 @@ pub enum GateConsumptionError {
     SpecialistChanged(EligibilityCode),
 }
 pub struct GateRun {
+    work_digest: String,
     envelope: GuardRunEnvelope,
     domain: Option<GateDecision>,
     contract: Vec<u8>,
@@ -91,6 +92,9 @@ pub struct GateRun {
     retained: Vec<RetainedEvidence>,
 }
 impl GateRun {
+    pub(crate) fn work_digest(&self) -> &str {
+        &self.work_digest
+    }
     pub fn envelope(&self) -> &GuardRunEnvelope {
         &self.envelope
     }
@@ -283,6 +287,7 @@ impl PendingGate {
         now: i64,
         finished_at: &str,
     ) -> Result<GateRun, TransportDiagnostic> {
+        let work_digest = self.store_identity().digest;
         let mut seen = BTreeSet::new();
         let mut gaps = Vec::new();
         let mut upstream_reports = Vec::new();
@@ -443,6 +448,7 @@ impl PendingGate {
         verify_engine_artifacts(&envelope, &contract_bytes, &facts_bytes, &report_bytes)
             .map_err(|_| error("gate.self_verification"))?;
         Ok(GateRun {
+            work_digest,
             envelope,
             domain: Some(domain),
             contract: contract_bytes,
@@ -460,6 +466,7 @@ impl PendingGate {
         code: &str,
         finished_at: &str,
     ) -> Result<GateRun, TransportDiagnostic> {
+        let work_digest = self.store_identity().digest;
         let envelope = self.attempt.finish(AttemptOutput {
             coverage: coverage(&self.required, &self.observed),
             run_status: status,
@@ -481,6 +488,7 @@ impl PendingGate {
             expires_at: None,
         })?;
         Ok(GateRun {
+            work_digest,
             envelope,
             domain: None,
             contract: vec![],

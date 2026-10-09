@@ -1,7 +1,7 @@
 //! Owner-private Linux durable attempt history. Storage never establishes authority.
 //! Descriptor/lock/sync protocol adapted from reviewed GitGuard df2f756; state replay is FlowGuard's.
 use crate::{
-    gate::PendingGate,
+    gate::{GateRun, PendingGate},
     run_store::{AttemptHandle, MemoryRunStore, WorkIdentity},
 };
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ use std::{
     },
     path::{Path, PathBuf},
 };
-const VERSION: &str = "flowguard.attempt-log/v1alpha1";
+const VERSION: &str = "flowguard.attempt-log/v1alpha2";
 const MAX_BYTES: usize = 16 * 1024 * 1024;
 const MAX_EVENTS: usize = 10000;
 #[derive(Clone, Serialize, Deserialize)]
@@ -31,6 +31,7 @@ enum Event {
     },
     Append {
         run_id: String,
+        work_digest: String,
         envelope: String,
     },
     Publish {
@@ -62,8 +63,12 @@ impl Event {
                     .reserve_work(work.clone(), key, *generation)
                     .map(EventResult::Attempt)
             }
-            Self::Append { run_id, envelope } => store
-                .append(run_id, envelope.as_bytes())
+            Self::Append {
+                run_id,
+                work_digest,
+                envelope,
+            } => store
+                .append_replayed(run_id, work_digest, envelope.as_bytes())
                 .map(|_| EventResult::Unit),
             Self::Publish { run_id, expected } => {
                 store.publish(run_id, *expected).map(|_| EventResult::Unit)
@@ -372,16 +377,16 @@ impl DurableRunStore {
             _ => Err("invalid reserve result".into()),
         }
     }
-    pub fn append(&self, run_id: &str, bytes: &[u8]) -> Result<(), String> {
-        if bytes.len() > 1024 * 1024 {
+    pub fn append(&self, run: &GateRun) -> Result<(), String> {
+        let envelope =
+            serde_json::to_string(run.envelope()).map_err(|_| "invalid envelope encoding")?;
+        if envelope.len() > 1024 * 1024 {
             return Err("envelope budget".into());
         }
-        let envelope = std::str::from_utf8(bytes)
-            .map_err(|_| "invalid envelope encoding")?
-            .to_owned();
         self.store
             .mutate(Event::Append {
-                run_id: run_id.into(),
+                run_id: run.envelope().run_id.clone(),
+                work_digest: run.work_digest().into(),
                 envelope,
             })
             .map(|_| ())
@@ -548,6 +553,54 @@ mod tests {
         }
     }
 
+    #[test]
+    fn replay_rejects_original_completion_digest_mismatch_and_legacy_version() {
+        let dir = tempfile::tempdir_in(env!("CARGO_MANIFEST_DIR")).unwrap();
+        let store = FileStore::create(dir.path()).unwrap();
+        let envelope = guardengine::integration::load_envelope_json(
+            include_bytes!("../fixtures/gate_mapping/envelope.json"),
+            guardengine::integration::EvidenceProfile::EngineBacked,
+        )
+        .unwrap();
+        let work = work(&envelope.run_id);
+        store
+            .mutate(Event::Advance {
+                work: work.clone(),
+                expected: 0,
+            })
+            .unwrap();
+        store
+            .mutate(Event::Reserve {
+                work: work.clone(),
+                key: "request".into(),
+                generation: 1,
+            })
+            .unwrap();
+        let append = Event::Append {
+            run_id: envelope.run_id,
+            work_digest: crate::digest(b"old different full work"),
+            envelope: include_str!("../fixtures/gate_mapping/envelope.json").into(),
+        };
+        assert!(store.mutate(append.clone()).is_err());
+        let (mut snapshot, _) = store.load().unwrap();
+        snapshot.events.push(append);
+        snapshot.checksum = snapshot.checksum().unwrap();
+        std::fs::write(
+            dir.path().join("state.json"),
+            serde_json::to_vec(&snapshot).unwrap(),
+        )
+        .unwrap();
+        assert!(FileStore::open(dir.path()).is_err());
+        snapshot.events.pop();
+        snapshot.api_version = "flowguard.attempt-log/v1alpha1".into();
+        snapshot.checksum = snapshot.checksum().unwrap();
+        std::fs::write(
+            dir.path().join("state.json"),
+            serde_json::to_vec(&snapshot).unwrap(),
+        )
+        .unwrap();
+        assert!(FileStore::open(dir.path()).is_err());
+    }
     #[test]
     fn corruption_and_recomputed_checksum_invalid_cas_fail_closed() {
         let dir = tempfile::tempdir_in(env!("CARGO_MANIFEST_DIR")).unwrap();

@@ -51,22 +51,15 @@ fn append_keeps_original_bytes_and_rejects_overwrite_or_unbound_envelope() {
     store.reserve(&p, "req", g).unwrap();
     let run = p.cancel(TIME).unwrap();
     let bytes = serde_json::to_vec(run.envelope()).unwrap();
-    store.append("first", &bytes).unwrap();
-    store.append("first", &bytes).unwrap();
-    let mut changed = bytes.clone();
-    changed.push(b' ');
-    assert!(store.append("first", &changed).is_err());
+    store.append(&run).unwrap();
+    store.append(&run).unwrap();
+    let changed = plan(&b, &u, "first")
+        .cancel("2026-10-09T00:00:01Z")
+        .unwrap();
+    assert!(store.append(&changed).is_err());
     assert_eq!(store.history(&plan(&b, &u, "query")).unwrap(), vec![bytes]);
-    let pending = plan(&b, &u, "second");
-    store.reserve(&pending, "req-2", g).unwrap();
-    let mut envelope = pending.cancel(TIME).unwrap().envelope().clone();
-    envelope.coverage.required_scopes.pop();
-    assert!(
-        store
-            .append("second", &serde_json::to_vec(&envelope).unwrap())
-            .is_err()
-    );
-    assert!(store.append("absent", b"{}").is_err());
+    let unregistered = plan(&b, &u, "absent").cancel(TIME).unwrap();
+    assert!(store.append(&unregistered).is_err());
     assert_eq!(store.history(&plan(&b, &u, "query")).unwrap().len(), 1);
 }
 #[test]
@@ -106,15 +99,14 @@ fn late_results_stay_history_and_cas_never_rolls_back() {
         Some(guardengine::Decision::Block)
     );
     let newbytes = serde_json::to_vec(newrun.envelope()).unwrap();
-    store.append("new", &newbytes).unwrap();
+    store.append(&newrun).unwrap();
     store.publish("new", g2).unwrap();
     let oldrun = finish(old, &u);
     assert_eq!(
         oldrun.envelope().decision,
         Some(guardengine::Decision::Allow)
     );
-    let oldbytes = serde_json::to_vec(oldrun.envelope()).unwrap();
-    store.append("old", &oldbytes).unwrap();
+    store.append(&oldrun).unwrap();
     assert_eq!(store.publish("old", g), Err(StoreError::Stale));
     assert_eq!(store.publish("old", g2), Err(StoreError::Stale));
     assert_eq!(
@@ -155,8 +147,8 @@ fn concurrent_publication_is_single_assignment_with_immutable_history() {
     for id in ["one", "two"] {
         let p = plan(&b, &u, id);
         store.reserve(&p, id, generation).unwrap();
-        let bytes = serde_json::to_vec(p.cancel(TIME).unwrap().envelope()).unwrap();
-        store.append(id, &bytes).unwrap();
+        let run = p.cancel(TIME).unwrap();
+        store.append(&run).unwrap();
     }
     let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));
     let joins: Vec<_> = ["one", "two"]
@@ -256,13 +248,15 @@ fn reused_worktree_path_cannot_share_a_different_requirement_pointer() {
     let gb = store.advance(&b, 0).unwrap();
     store.reserve(&a, "same-key", ga).unwrap();
     store.reserve(&b, "same-key", gb).unwrap();
-    let bytes = serde_json::to_vec(a.cancel(TIME).unwrap().envelope()).unwrap();
-    store.append("A-run", &bytes).unwrap();
+    let arun = a.cancel(TIME).unwrap();
+    let bytes = serde_json::to_vec(arun.envelope()).unwrap();
+    store.append(&arun).unwrap();
     store.publish("A-run", ga).unwrap();
     assert_eq!(store.current(&b).unwrap(), None);
     assert!(store.history(&b).unwrap().is_empty());
-    let bbytes = serde_json::to_vec(b.cancel(TIME).unwrap().envelope()).unwrap();
-    store.append("B-run", &bbytes).unwrap();
+    let brun = b.cancel(TIME).unwrap();
+    let bbytes = serde_json::to_vec(brun.envelope()).unwrap();
+    store.append(&brun).unwrap();
     store.publish("B-run", gb).unwrap();
     assert_eq!(
         store.current(&plan(&other, &ub, "query")).unwrap(),

@@ -31,8 +31,9 @@ fn restart_preserves_registration_history_and_current_without_reset() {
     let store = DurableRunStore::open(directory.path()).unwrap();
     assert_eq!(store.generation(&p).unwrap(), Some(generation));
     assert_eq!(store.reserve(&p, "request", generation).unwrap(), original);
-    let bytes = serde_json::to_vec(p.cancel(TIME).unwrap().envelope()).unwrap();
-    store.append("first", &bytes).unwrap();
+    let run = p.cancel(TIME).unwrap();
+    let bytes = serde_json::to_vec(run.envelope()).unwrap();
+    store.append(&run).unwrap();
     store.publish("first", generation).unwrap();
     drop(store);
     let store = DurableRunStore::open(directory.path()).unwrap();
@@ -98,25 +99,23 @@ fn bind_head(
     )
     .unwrap()
 }
-fn finished(p: PendingGate, b: &flowguard::context::ValidatedBinding, u: &Upstream) -> Vec<u8> {
+fn finished(p: PendingGate, b: &flowguard::context::ValidatedBinding, u: &Upstream) -> GateRun {
     let f = frozen(b, u, false);
     let scope = obligation_scope(f.obligations().first().unwrap());
-    let run = p
-        .evaluate(
-            &[SpecialistEvidence {
-                scope: &scope,
-                envelope: &u.envelope,
-                artifacts: u.artifacts(),
-            }],
-            &FixtureAuthority {
-                approval: None,
-                unavailable: false,
-            },
-            NOW,
-            TIME,
-        )
-        .unwrap();
-    serde_json::to_vec(run.envelope()).unwrap()
+    p.evaluate(
+        &[SpecialistEvidence {
+            scope: &scope,
+            envelope: &u.envelope,
+            artifacts: u.artifacts(),
+        }],
+        &FixtureAuthority {
+            approval: None,
+            unavailable: false,
+        },
+        NOW,
+        TIME,
+    )
+    .unwrap()
 }
 #[test]
 fn real_head1_late_allow_cannot_replace_head2_block_or_requirement_b_after_reopen() {
@@ -159,24 +158,27 @@ fn real_head1_late_allow_cannot_replace_head2_block_or_requirement_b_after_reope
     let gb = store.advance(&independent, 0).unwrap();
     store.reserve(&new, "new-request", g2).unwrap();
     store.reserve(&independent, "b-request", gb).unwrap();
-    let newbytes = finished(new, &b2, &u2);
+    let newrun = finished(new, &b2, &u2);
+    let newbytes = serde_json::to_vec(newrun.envelope()).unwrap();
     assert_eq!(
         serde_json::from_slice::<serde_json::Value>(&newbytes).unwrap()["decision"],
         "BLOCK"
     );
-    let bbytes = finished(independent, &bb, &ub);
-    store.append("A-head2", &newbytes).unwrap();
+    let brun = finished(independent, &bb, &ub);
+    let bbytes = serde_json::to_vec(brun.envelope()).unwrap();
+    store.append(&newrun).unwrap();
     store.publish("A-head2", g2).unwrap();
-    store.append("B-head2", &bbytes).unwrap();
+    store.append(&brun).unwrap();
     store.publish("B-head2", gb).unwrap();
     drop(store);
     let store = DurableRunStore::open(directory.path()).unwrap();
-    let oldbytes = finished(old, &b1, &u1);
+    let oldrun = finished(old, &b1, &u1);
+    let oldbytes = serde_json::to_vec(oldrun.envelope()).unwrap();
     assert_eq!(
         serde_json::from_slice::<serde_json::Value>(&oldbytes).unwrap()["decision"],
         "ALLOW"
     );
-    store.append("A-head1", &oldbytes).unwrap();
+    store.append(&oldrun).unwrap();
     assert!(store.publish("A-head1", g1).is_err());
     assert!(store.publish("A-head1", g2).is_err());
     drop(store);

@@ -9,7 +9,7 @@
   ],
   "properties": {
     "api_version": {
-      "const": "flowguard.attempt-log/v1alpha1"
+      "const": "flowguard.attempt-log/v1alpha2"
     },
     "store_id": {
       "type": "string",
@@ -76,7 +76,8 @@
             "required": [
               "kind",
               "run_id",
-              "envelope"
+              "envelope",
+              "work_digest"
             ],
             "properties": {
               "kind": {
@@ -90,6 +91,10 @@
               "envelope": {
                 "type": "string",
                 "maxLength": 1048576
+              },
+              "work_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
               }
             }
           },
@@ -126,7 +131,7 @@
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://flowguard.local/schemas/attempt-log-v1alpha1",
+  "$id": "https://flowguard.local/schemas/attempt-log-v1alpha2",
   "$defs": {
     "work": {
       "type": "object",

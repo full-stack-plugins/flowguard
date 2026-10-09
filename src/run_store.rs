@@ -1,5 +1,5 @@
 //! Explicit process-local attempt storage. No persistence or authority grants.
-use crate::gate::PendingGate;
+use crate::gate::{GateRun, PendingGate};
 use guardengine::integration::RunBinding;
 use std::{collections::BTreeMap, sync::Mutex};
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -127,8 +127,22 @@ impl MemoryRunStore {
     }
 }
 impl MemoryRunStore {
-    /// Records structurally validated bytes. It does not authenticate evidence or grant eligibility.
-    pub fn append(&self, run_id: &str, bytes: &[u8]) -> Result<(), StoreError> {
+    /// Only a result carrying its private original work identity can complete a reservation.
+    /// Persistence and identity matching still do not authenticate production authority.
+    /// ```compile_fail
+    /// let store = flowguard::run_store::MemoryRunStore::default();
+    /// store.append(b"{}"); // Raw envelope bytes cannot supply original completion identity.
+    /// ```
+    pub fn append(&self, run: &GateRun) -> Result<(), StoreError> {
+        let bytes = serde_json::to_vec(run.envelope()).map_err(|_| StoreError::Invalid)?;
+        self.append_replayed(&run.envelope().run_id, run.work_digest(), &bytes)
+    }
+    pub(crate) fn append_replayed(
+        &self,
+        run_id: &str,
+        work_digest: &str,
+        bytes: &[u8],
+    ) -> Result<(), StoreError> {
         use guardengine::integration::{EvidenceProfile, load_envelope_json};
         if bytes.len() > 1024 * 1024 {
             return Err(StoreError::Capacity);
@@ -137,7 +151,8 @@ impl MemoryRunStore {
             .map_err(|_| StoreError::Invalid)?;
         let mut state = self.state.lock().map_err(|_| StoreError::Poisoned)?;
         let attempt = state.attempts.get(run_id).ok_or(StoreError::Missing)?;
-        if envelope.run_id != run_id
+        if work_digest != attempt.work.digest
+            || envelope.run_id != run_id
             || envelope.binding != attempt.work.binding
             || envelope.coverage.required_scopes != attempt.work.required
             || envelope.producer.guard != "flowguard"

@@ -84,8 +84,22 @@ assert all(raw_digest((DEST/name).read_bytes())==digest for name,digest in initi
 producer_manifest=read(DEST/'producer-manifest.json')
 for case,artifacts in producer_manifest['artifacts'].items():
  for name,digest in artifacts.items():assert hashlib.sha256((DEST/case/name).read_bytes()).hexdigest()==digest,(case,name)
-policy=read(DEST/'A/specguard/contract.json');policy['metadata']['revision']='2';write(DEST/'rules-revision2.json',policy)
-write(DEST/'analyzer-revision2.json',{'guard':'SpecGuard','analyzerId':'specguard.structural','analyzerVersion':'2'})
+# Keep comparison domains byte-identical except the one protected descriptor field.
+policies=read(DEST/'A/policies.json');scopes=read(DEST/'A/scopes.json');sg=scopes['specguard']
+assert json.dumps(policies,separators=(',',':')).encode()==(DEST/'A/policies.json').read_bytes()
+contract=read(DEST/'A/specguard/contract.json');contract['metadata']['revision']='2'
+write(DEST/'rules-contract-revision2.json',contract)
+new_policies=copy.deepcopy(policies);new_policies[sg]['contract_digest']=raw_digest((DEST/'rules-contract-revision2.json').read_bytes())
+assert new_policies[sg]['contract_digest']!=policies[sg]['contract_digest']
+restored=copy.deepcopy(new_policies);restored[sg]['contract_digest']=policies[sg]['contract_digest'];assert restored==policies
+write(DEST/'rules-revision2.json',new_policies)
+producers=[[scope,copy.deepcopy(policy['producer'])] for scope,policy in policies.items()]
+new_producers=copy.deepcopy(producers);index=[p[0] for p in producers].index(sg)
+assert producers[index][1]['guard']=='SpecGuard'
+new_producers[index][1]['analyzerVersion']='2';assert new_producers[index][1]['analyzerVersion']!=producers[index][1]['analyzerVersion']
+restored=copy.deepcopy(new_producers);restored[index][1]['analyzerVersion']=producers[index][1]['analyzerVersion'];assert restored==producers
+write(DEST/'analyzer-revision2.json',new_producers)
+write(DEST/'drift-isolation.json',{'rules':{'before':raw_digest((DEST/'A/policies.json').read_bytes()),'after':raw_digest((DEST/'rules-revision2.json').read_bytes()),'field':[sg,'contract_digest']},'analyzer':{'before':raw_digest(json.dumps(producers,separators=(',',':')).encode()),'after':raw_digest((DEST/'analyzer-revision2.json').read_bytes()),'field':[index,1,'analyzerVersion']},'same_domain':True,'only_one_field_changed_per_dimension':True})
 # Joint publication invalidation is verified by the same native library helper.
 write(DEST/'project-baseline-revision2.json',{'version':'joint.project/v1','project':'shared-02','revision':2})
 helper=Path(os.environ.get('FLOWGUARD_JOINT_INVALIDATION',Path(__file__).resolve().parents[3]/'target/debug/examples/joint_invalidation'))

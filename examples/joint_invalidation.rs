@@ -329,6 +329,7 @@ fn main() {
         .unwrap()
     };
 
+    let isolation: Value = read(root.join("drift-isolation.json"));
     for (dimension, file) in [
         ("rules", "rules-revision2.json"),
         ("analyzer", "analyzer-revision2.json"),
@@ -352,6 +353,14 @@ fn main() {
             .iter()
             .map(|(id, p)| (id.clone(), isolated.history(p).unwrap()))
             .collect();
+        assert_eq!(
+            isolation[dimension]["before"].as_str().unwrap(),
+            if dimension == "rules" {
+                &contexts["A"].rules
+            } else {
+                &contexts["A"].analyzer
+            }
+        );
         let mut drift = contexts.clone();
         let changed = flowguard::digest(&bytes(root.join(file)));
         if dimension == "rules" {
@@ -359,6 +368,21 @@ fn main() {
         } else {
             drift.get_mut("A").unwrap().analyzer = changed
         }
+        assert_eq!(
+            isolation[dimension]["after"].as_str().unwrap(),
+            if dimension == "rules" {
+                &drift["A"].rules
+            } else {
+                &drift["A"].analyzer
+            }
+        );
+        let mut restored = drift.clone();
+        if dimension == "rules" {
+            restored.get_mut("A").unwrap().rules = contexts["A"].rules.clone()
+        } else {
+            restored.get_mut("A").unwrap().analyzer = contexts["A"].analyzer.clone()
+        };
+        assert!(restored == contexts);
         let delta = snapshot(&contexts).changes(&snapshot(&drift), NOW).unwrap();
         assert_eq!(delta.affected(), &BTreeSet::from(["A".into()]));
         delta.apply(&isolated).unwrap();
@@ -388,6 +412,6 @@ fn main() {
     }
     println!(
         "{}",
-        serde_json::json!({"shared_project_invalidation":true,"causal_paths":delta.causal_paths(),"shared_project_digest":shared,"scoped_approved_baselines":{"A":contexts["A"].baseline,"B":contexts["B"].baseline,"M2":contexts["M2"].baseline},"rule_and_analyzer_drift_withdraw_A_only":true,"old_M1_publication_refused":true,"historical_bytes_unchanged":true,"project_node":"unexecuted controller source tracker, no positive gate or authority"})
+        serde_json::json!({"shared_project_invalidation":true,"causal_paths":delta.causal_paths(),"shared_project_digest":shared,"scoped_approved_baselines":{"A":contexts["A"].baseline,"B":contexts["B"].baseline,"M2":contexts["M2"].baseline},"rule_and_analyzer_drift_withdraw_A_only":true,"same_domain_drift_isolation":isolation,"old_M1_publication_refused":true,"historical_bytes_unchanged":true,"project_node":"unexecuted controller source tracker, no positive gate or authority"})
     );
 }

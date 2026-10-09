@@ -34,7 +34,11 @@ explicit edges. The existing accepted-stage APIs are not exercised by this node.
 
 The native CodeGuard observation is only the fixed Ruff fixture below. It does
 not establish parity for other tools, CodeGuard versions, or all native commands.
-Rule/analyzer drift changes protected controller descriptors and checks withdrawal;
+Rule/analyzer drift compares the same serialized policy-map / producer-tuple domains:
+only the SG contract digest or analyzerVersion field changes. Restoring that field
+reproduces the entire original input; all other ContextDigests and graph nodes stay
+identical. `drift-isolation.json` records both before/after digests and changed paths.
+This changes protected controller descriptors and checks withdrawal;
 it does not run a second analyzer version or certify cross-version compatibility.
 M1/M2 are real local objects with a controlled member event description; this is
 not production controller-event authentication. No grant, merge, ref update or

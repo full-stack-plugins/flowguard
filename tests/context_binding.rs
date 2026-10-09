@@ -90,6 +90,16 @@ fn binds_actual_sha1_and_sha256_objects_and_rejects_ambiguity_and_drift() {
             format!("sha256:{}", snapshot.source_snapshot_digest())
         );
         assert!(bound.is_advisory());
+        let mut changed_scope = serde_json::to_value(&snapshot).unwrap();
+        changed_scope["allowed_paths"] = serde_json::json!([[98]]);
+        let alternate: gitguard::candidate::CandidateSnapshot =
+            serde_json::from_value(changed_scope).unwrap();
+        let other = bind(&input, &repo, &alternate).unwrap();
+        assert_ne!(
+            bound.candidate_scope_digest(),
+            other.candidate_scope_digest()
+        );
+        assert_ne!(bound.domain_digest(), other.domain_digest());
         for case in 0..5 {
             let mut bad = input.clone();
             match case {

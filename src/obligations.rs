@@ -27,6 +27,13 @@ pub struct FrozenObligations {
     digest: String,
 }
 impl FrozenObligations {
+    pub fn context_digest(&self) -> &str {
+        &self.payload.context_digest
+    }
+    pub fn graph_digest(&self) -> &str {
+        &self.payload.graph_digest
+    }
+
     pub fn obligations(&self) -> &BTreeSet<EvidenceObligation> {
         &self.payload.obligations
     }

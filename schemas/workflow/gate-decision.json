@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowguard.local/schemas/gate/v1alpha1/gate-decision",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": {
+      "const": "flowguard.gate/v1alpha1"
+    },
+    "kind": {
+      "const": "GateDecision"
+    },
+    "authorityProfile": {
+      "const": "advisory"
+    },
+    "mappingVersion": {
+      "const": "flowguard.gate-mapping/v1alpha1"
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*",
+      "maxLength": 128
+    },
+    "bindingDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "frozenObligationsDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "decision": {
+      "enum": [
+        "ALLOW",
+        "BLOCK",
+        "REQUIRE_APPROVAL"
+      ]
+    },
+    "qualification": {
+      "enum": [
+        "eligible",
+        "blocked",
+        "review_required"
+      ]
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*",
+            "maxLength": 256
+          },
+          "kind": {
+            "enum": [
+              "block",
+              "review",
+              "advise"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "scope",
+          "kind",
+          "code"
+        ]
+      },
+      "maxItems": 192
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "pattern": "^artifact://"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "mediaType": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
+        }
+      },
+      "required": [
+        "uri",
+        "digest",
+        "mediaType"
+      ]
+    },
+    "upstreamReports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "uri": {
+            "type": "string",
+            "pattern": "^artifact://"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "mediaType": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*"
+          }
+        },
+        "required": [
+          "uri",
+          "digest",
+          "mediaType"
+        ]
+      },
+      "maxItems": 64
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "authorityProfile",
+    "mappingVersion",
+    "action",
+    "bindingDigest",
+    "frozenObligationsDigest",
+    "decision",
+    "qualification",
+    "gaps",
+    "report",
+    "upstreamReports"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "ALLOW"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "qualification": {
+            "const": "eligible"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "BLOCK"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "qualification": {
+            "const": "blocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "REQUIRE_APPROVAL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "qualification": {
+            "const": "review_required"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -65,3 +65,11 @@ Root's independent review and fix recheck accepted exactly **1.1, 1.3, 1.5, 1.6,
 - Integration: retain actual GG v1alpha2 candidate scope digest within frozen scope identity to avoid using narrower RunBinding as reuse key. SG export remains fixture-only at its current reviewed schema.
 
 All new task claims remain partial until root review; no production FG-GATE or execution grant. Execute TDD and commit this slice for review before broadening.
+
+## Gate slice outcome pending review
+
+Implemented closed actual-GE projection, a versioned GateDecision schema/loader, real own-report generation, GE BoundAttempt final coverage, immutable upstream retention, exact policy/evidence verification through GE eligibility, bound provider/error/cancel outcomes, and consumption-time upstream revocation rechecks. Full GG v1alpha2 and full frozen/action identities are carried in required scopes. All required scopes are fixed before collection.
+
+TDD: named executable RED precedes projection/report/schema changes; additional RED→GREEN cases found narrower binding scope identity, missing frozen-snapshot identity, cross-action consumption, and cached upstream revocation. Specialist evidence regression covers changed base/group/requirements, tampered bytes, changed analyzer, unavailable/untrusted producer and execution failure. Captured JSON fixture is produced through the real engine, with explicitly synthetic specialist/authority fixtures.
+
+No new task box is checked. Tasks 1.2/3.1/3.2/3.4/3.5 remain partial until full specified scope and review; 3.3's local mapping is ready for review. No production provider, protected loader, full stage eligibility transition, persistent run/invalidation/queue layer, CLI/host enforcement or real task 3.6 cross-provider acceptance. See `docs/adr/gate-contract.md` and `/workspace/guard-implementation-ledger/flowguard-gate-slice-report.md` for exact tests, compatibility revisions and remaining limits.

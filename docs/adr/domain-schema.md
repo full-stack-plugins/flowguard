@@ -8,7 +8,7 @@ Stable graph ownership is (owner,stage), with one node per pair. Project stages 
 
 BaselineRef requires exact repository, stage 02/07, immutable hexadecimal revision, content/policy digest, approval reference and requirement set. `resolve_baseline` creates a separate structural snapshot per requirement; it does not authenticate the approval or resolve revision existence. ReleaseRef compares the exact nonempty feature→09-digest map. Real baseline authenticity remains the provider's responsibility.
 
-GateDecision is deliberately not frozen in this slice: it must correspond to FlowGuard's own real engine report and protected mapping (tasks 3.3/3.4). StageRecord is currently the graph node contract, not a complete accepted-stage artifact containing all evidence links. Task 1.2 therefore remains **partial**, not completed by the presence of these schemas.
+The subsequent gate slice adds strict `flowguard.gate/v1alpha1` GateDecision and `flowguard.gate-mapping/v1alpha1`, paired with actual GE reports; see `gate-contract.md`. StageRecord is currently the graph node contract, not a complete accepted-stage artifact containing all evidence links. Task 1.2 therefore remains **partial**, not completed by the presence of these schemas.
 
 Shared `RunBinding` is imported from GuardEngine without local field additions. GitGuard candidate digests use unprefixed hexadecimal SHA-256; the adapter adds the required `sha256:` URI-style algorithm prefix. Candidate/base objects and snapshot bytes are actually verified through GitGuard, but local repo/controller identity remains advisory. Dirty snapshots are rejected rather than pretending a commit digest covers dirty bytes. Neither engine protocol is extended.
 

@@ -21,10 +21,24 @@ pub enum PreBindingDiagnostic {
 #[derive(Debug, Clone)]
 pub struct ValidatedBinding {
     binding: RunBinding,
+    candidate_scope_digest: String,
 }
 impl ValidatedBinding {
     pub fn binding(&self) -> &RunBinding {
         &self.binding
+    }
+    pub fn candidate_scope_digest(&self) -> String {
+        self.candidate_scope_digest.clone()
+    }
+    pub fn domain_digest(&self) -> String {
+        crate::digest(
+            &serde_json::to_vec(&(
+                "flowguard.binding/v1",
+                &self.binding,
+                &self.candidate_scope_digest,
+            ))
+            .expect("closed binding"),
+        )
     }
     pub fn is_advisory(&self) -> bool {
         true
@@ -80,5 +94,8 @@ pub fn bind(
         source_snapshot_digest: format!("sha256:{}", candidate.source_snapshot_digest()),
         baseline_digest: candidate.baseline_digest().map(|d| format!("sha256:{d}")),
     };
-    Ok(ValidatedBinding { binding })
+    Ok(ValidatedBinding {
+        binding,
+        candidate_scope_digest: format!("sha256:{}", candidate.binding_digest()),
+    })
 }

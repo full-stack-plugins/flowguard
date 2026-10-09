@@ -1,0 +1,1 @@
+{"apiVersion":"guard.partme.ai/v1alpha1","kind":"GuardFacts","analyzer":{"id":"flowguard.stage-gates","version":"0.1.0"},"subject":{"id":"flowguard.workflow","snapshotDigest":"sha256:a9479b59b9efd7eb7f9df320bc0c09d93118155c904cf0b74262f937308db1be"},"completeness":"complete","facts":[],"diagnostics":[]}

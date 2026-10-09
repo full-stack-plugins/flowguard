@@ -6,7 +6,7 @@
 
 ## Current status and evidence
 
-The original baseline `a6bd25f` was documentation-only. This branch now has a Rust library, read-only CLI, actual GuardEngine/GitGuard integration, explicit fixture authority, and local durable attempt storage. **10/30 tasks** have independent local-profile acceptance; CLI5.1 is pending review. See [implementation progress](docs/implementation-progress.md). No production provider, host enforcement or merge/release execution is provided.
+The original baseline `a6bd25f` was documentation-only. This branch now has a Rust library, read-only CLI, actual GuardEngine/GitGuard integration, explicit fixture authority, and local durable attempt storage. **11/30 tasks** have independent local-profile acceptance; CLI5.1 has independent acceptance. See [implementation progress](docs/implementation-progress.md). No production provider, host enforcement or merge/release execution is provided.
 
 The external plugin was inspected at fixed SHA `13b52b054c31f614dc272b18c195b8fa929aa595`; see the [compatibility ADR](docs/adr/legacy-compatibility.md). This is source-backed investigation, not full legacy parity or migration acceptance.
 

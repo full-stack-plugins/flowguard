@@ -107,3 +107,7 @@ Root closed full-work completion P2 at `1ffd34a` and accepted local **4.1/4.2** 
 Added actual binary and all four command paths: discover, stage status (source-observation scope, qualification unassessed), evidence verify (integrity only), gate check (real GG binding and GE FlowGuard report). Strict pinned request and explicit separate fixture-authority options; no production actor inference, output writes or persistent-store activation. Actual binary tests cover0/2/3/4, malformed prebinding empty stdout, bound error/null and requested cancellation, default unavailable authority, partial missing provider, revoked records reloaded, unknown --report, exact output artifact bytes and immutable upstream REQUIRE_APPROVAL when a new approved envelope is supplied.
 
 The local CLI profile is ready for independent review; task5.1 remains unchecked. Signal/process-death supervision and authenticated host clocks remain outside the synchronous CLI profile. See [CLI ADR](adr/cli-contract.md).
+
+## Read-only CLI independent acceptance registration
+
+Root accepted local task **5.1** at `8c62afb`, based on `/workspace/guard-implementation-ledger/flowguard-cli-independent-review.md`: 67 existing tests plus 2 independent probes, no reproducible P1/P2. Accepted total **11/30**. This is the explicit read-only CLI profile; fixture receipts do not authenticate production identities or authorize execution. Earlier pending-review entries above are historical.

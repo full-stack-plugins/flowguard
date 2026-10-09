@@ -68,6 +68,7 @@ pub fn run(args: Vec<String>) -> CliOutput {
 fn dispatch(args: &[String]) -> Result<CliOutput, ()> {
     let command = args.first().ok_or(())?;
     match (command.as_str(), args.get(1).map(String::as_str)) {
+        ("legacy", Some("status")) => legacy_status(&args[2..]),
         ("discover", _) => discovery(&args[1..], false),
         ("stage", Some("status")) => discovery(&args[2..], true),
         ("evidence", Some("verify")) => verify(&args[2..]),
@@ -491,4 +492,11 @@ impl AuthorityProvider for FixtureAuthority {
             },
         })
     }
+}
+
+fn legacy_status(args: &[String]) -> Result<CliOutput, ()> {
+    let o = Options::parse(args, &["--root", "--feature", "--stage", "--revision"], &[])?;
+    let root = AllowedRoot::new(o.get("--root")?, 1024 * 1024).map_err(|_| ())?;
+    let view = crate::legacy::status(&root, o.get("--feature")?, o.get("--stage")?, o.get("--revision")?).map_err(|_| ())?;
+    json(0, view)
 }

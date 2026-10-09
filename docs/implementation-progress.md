@@ -154,3 +154,9 @@ additive explicitly frozen native baseline coordination are implemented. See
 `fixtures/providers/cross-guard/README.md` and
 `docs/adr/0010-native-specialist-baselines.md`. Fixture identity only; task checkbox
 remains unchanged pending independent review.
+
+## Independently accepted 4.3 / 4.6 — 2026-10-09
+
+Root accepted fixed FlowGuard `4ea60d8d8618c62f1f3fe990ae4236b07c6943f1` after 36 independently executed affected tests (11 invalidation, 8 stage, 3 release, 5 DAG, 8 CLI, 1 CLI scoped test containing 13 scenarios) and static review without blockers. Fixed dependency pins: GE `b0e4b445e1a20a9354d55ebb41bbedaf16ec8a74`, SG `8fc3f9b0df0df388b8f4ec6cdedab64f89d1d033`, AG `d6c8235d9a02e6039a5b5212cf0cadede8b53a3d`, GG `5085593182e3955fb587c20277c98d43b6f54609`.
+
+4.3 is accepted for bounded MemoryRunStore invalidation and explicit publication-aware gate/stage/release consumption only. Detached historical APIs do not gain store freshness; no durable-store parity or execution grant is inferred. 4.6 is accepted for real five-provider captured artifacts with the explicit local fixture-controller profile, read-only DAG execution and consumption-time rejection. Production identity, hosted required checks, merge-queue events and execution remain outside this acceptance. FlowGuard: 24/30 tasks accepted.

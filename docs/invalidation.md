@@ -1,6 +1,6 @@
 # FG4.3 local invalidation API and boundaries
 
-The process-local snapshot, atomic withdrawal and current-publication consumption slice is implemented for independent review. Task 4.3 remains unchecked until that review. Tests cover observation refresh/rollback, dependency closure, batch competition, pre-copy budgets and withdrawal during a reentrant authority callback.
+Task 4.3 is independently accepted at the bounded process-local snapshot, atomic withdrawal and explicit current-publication consumption scope; see implementation-progress.md for fixed pins and evidence. Tests cover observation refresh/rollback, dependency closure, batch competition, pre-copy budgets and withdrawal during a reentrant authority callback.
 
 MemoryRunStore::evaluate_eligibility checks the exact published attempt, generation, private work identity and retained envelope before and after fresh GE/provider validation. QualifiedStage::consume_published atomically checks all prerequisite publications before and after its full approval refresh. ReleasePlan::consume_published performs the same two batch checks across its exact feature09 fan-in, so withdrawing either feature closes project10 eligibility. No store lock is held during provider calls. A withdrawal during the callback therefore rejects the result without deadlock. These methods return an eligibility observation, never a grant or a guarantee against a subsequent external writer.
 

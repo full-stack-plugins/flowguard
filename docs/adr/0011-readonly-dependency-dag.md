@@ -1,6 +1,6 @@
 # Local read-only gate dependency DAG
 
-Status: local fixture profile implemented for independent review; task4.6 remains unchecked pending fixed-source validation.
+Status: task4.6 independently accepted for the local fixture profile; see implementation-progress.md for fixed-source pins and 36-test evidence.
 
 The integration test composes real read-only specialist artifacts before producing a FlowGuard technical result. The complete success case must include current-candidate SG source/approved-baseline evidence together with AG, CG, TG and GG on the same Git candidate and requirement context. Historical SG2.6 exports are not substituted for required current-candidate evidence. The new SG bridge corpus remains an explicit local fixture authority profile.
 

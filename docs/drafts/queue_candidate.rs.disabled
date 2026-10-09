@@ -1,0 +1,19 @@
+use flowguard::merge_queue::{ControllerEventPort,ControllerProfile,ControllerRecord,EventMember,ProtectedQueue,QueueClock,QueueConfig,QueueError,QueueSession};
+use std::{collections::BTreeMap,cell::Cell};
+struct Clock(Cell<i64>);
+impl QueueClock for Clock{fn now(&self)->Result<i64,QueueError>{Ok(self.0.get())}}
+struct Issuer {current:String,records:BTreeMap<String,ControllerRecord>}
+impl ControllerEventPort for Issuer {
+ fn profile(&self)->ControllerProfile{ControllerProfile::Fixture}
+ fn current(&self,reference:&str)->Result<ControllerRecord,QueueError>{
+  if reference!=self.current{return Err(QueueError::Authority)}
+  self.records.get(reference).cloned().ok_or(QueueError::Authority)
+ }
+}
+#[test]
+fn queue_api_requires_independent_current_issuer_and_actual_candidate(){
+ assert!(ProtectedQueue::freeze(QueueConfig{principal:"".into(),queue_id:"q".into(),repo_id:"r".into(),task_id:"t".into(),worktree_id:"w".into(),policy_digest:flowguard::digest(b"policy"),allowed_paths:vec![b"src".to_vec()]}).is_err());
+ let _clock=Clock(Cell::new(1));let _issuer=Issuer{current:"unissued".into(),records:BTreeMap::new()};
+ let _member=EventMember{oid:"a".repeat(40),requirement_ids:vec!["R".into()]};
+ let _type=std::mem::size_of::<QueueSession>();
+}

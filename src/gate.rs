@@ -273,6 +273,17 @@ fn prepare_with_sources(
     })
 }
 impl PendingGate {
+    pub(crate) fn stage_context_matches(
+        &self,
+        binding: &ValidatedBinding,
+        frozen: &FrozenObligations,
+        action: &str,
+    ) -> bool {
+        self.binding_digest == binding.domain_digest()
+            && self.frozen_digest == frozen.digest()
+            && self.binding == *binding.binding()
+            && self.action == action
+    }
     pub(crate) fn store_identity(&self) -> crate::run_store::WorkIdentity {
         let target = crate::digest(
             &serde_json::to_vec(&(

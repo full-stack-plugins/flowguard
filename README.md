@@ -43,16 +43,18 @@ FlowGuard’s local gate check produces its own engine-backed report over stage-
 
 Current GuardEngine protocol `guard.partme.ai/v1alpha1` is distinct from the proposed [integration envelope](docs/integration-contract.md). It supports strict GuardContract/GuardFacts/GuardReport and exact `forbid_relation`, not FlowGuard stage or approval objects. Reports are unsigned; recomputation establishes consistency, not provenance or authority.
 
-## Planned CLI — not runnable
+## Implemented read-only CLI
 
 ```sh
-flowguard discover --project .
-flowguard stage status --feature example
-flowguard gate check --task TASK-104 --action git-commit
-flowguard gate check --task TASK-104 --action release
+cargo build --locked --bin flowguard
+cargo test --locked
+target/debug/flowguard discover --root /absolute/project --feature example
+target/debug/flowguard stage status --root /absolute/project --feature example
+target/debug/flowguard evidence verify --root /absolute/evidence --envelope envelope.json --contract contract.json --facts facts.json --report-file report.json
+target/debug/flowguard gate check --repo /absolute/git-worktree --input-root /absolute/controller-input --request request.json --request-digest sha256:EXACT_REQUEST_DIGEST --run-id unique-attempt-id
 ```
 
-No install/build/test command exists here. The proposed check mapping is exit `0` ALLOW, `2` BLOCK, `3` REQUIRE_APPROVAL, `4` invalid input/runtime/verification error, with JSON on stdout and diagnostics on stderr. FlowGuard has no implemented `--report` behavior. Existing CodeGuard legacy exit codes must remain unchanged; an explicit adapter may normalize them.
+Use coordinated sibling GuardEngine/GitGuard/SpecGuard sources. Replace the example paths and digest with real bound inputs; see the [CLI contract and request format](docs/adr/cli-contract.md). Gate outputs its own ALLOW/BLOCK/REQUIRE_APPROVAL as exits `0`/`2`/`3`; errors and requested cancellation use `4`, with empty stdout before binding and null decision after binding. Other commands have their own documented exit semantics. `--report` is rejected; `--report-file` is an evidence input only. No task-ID inference or execution command is implemented. CodeGuard native exits remain command-specific and unchanged: native aggregate `3` must never be interpreted as FlowGuard REQUIRE_APPROVAL.
 
 ## Design and implementation path
 

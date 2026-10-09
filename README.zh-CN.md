@@ -37,20 +37,22 @@
 - 可信合并队列控制器针对精确集成候选重新计算义务与证据；GitGuard 检查 Git 领域条件，托管平台执行受保护合并。FlowGuard 不执行合并或发布。
 - `ALLOW` 仅是指定范围的技术决策。仅在必要分析完整时，缺少审批才可产生 `REQUIRE_APPROVAL`；审批不能豁免不完整分析或工具故障。读取、澄清与已授权修复保持可用。
 
-拟议 FlowGuard gate check 对阶段义务事实生成自己的引擎报告；信封 decision 与退出码反映该报告，不改写专业守卫结论。外部批准后，专业报告的 `REQUIRE_APPROVAL` 保持原样；新的 FlowGuard 评估可以确认指定范围的待审义务已满足。动作资格单独记录在领域附件，执行仍由可信控制器授权。事实投影和受保护门禁规则须先实现并通过等价性样例验证。
+本地 FlowGuard gate check 对阶段义务事实生成自己的引擎报告；信封 decision 与退出码反映该报告，不改写专业守卫结论。外部批准后，专业报告的 `REQUIRE_APPROVAL` 保持原样；新的 FlowGuard 评估可以确认指定范围的待审义务已满足。动作资格单独记录在领域附件，执行仍由可信控制器授权。当前投影使用真实引擎和本地 fixture；生产受保护配置与权限 provider 仍需另行验收。
 
 当前 GuardEngine 协议 `guard.partme.ai/v1alpha1` 与拟议[集成信封](docs/integration-contract.md) 分离：它支持严格的 GuardContract/GuardFacts/GuardReport 和精确 `forbid_relation`，不支持 FlowGuard 阶段或审批对象。报告未签名；重算验证一致性，不证明来源或授权。
 
-## 规划 CLI——尚不可运行
+## 已实现的只读 CLI
 
 ```sh
-flowguard discover --project .
-flowguard stage status --feature example
-flowguard gate check --task TASK-104 --action git-commit
-flowguard gate check --task TASK-104 --action release
+cargo build --locked --bin flowguard
+cargo test --locked
+target/debug/flowguard discover --root /absolute/project --feature example
+target/debug/flowguard stage status --root /absolute/project --feature example
+target/debug/flowguard evidence verify --root /absolute/evidence --envelope envelope.json --contract contract.json --facts facts.json --report-file report.json
+target/debug/flowguard gate check --repo /absolute/git-worktree --input-root /absolute/controller-input --request request.json --request-digest sha256:EXACT_REQUEST_DIGEST --run-id unique-attempt-id
 ```
 
-本仓没有安装、构建或测试命令。拟议 check 退出码为 `0` ALLOW、`2` BLOCK、`3` REQUIRE_APPROVAL、`4` 输入/运行/验证错误；stdout 输出 JSON，stderr 输出诊断。FlowGuard 尚无已实现的 `--report` 行为。CodeGuard 既有 CLI 退出码保持原样，只允许明确的适配层归一化。
+需配套同级 GuardEngine/GitGuard/SpecGuard 源码。示例路径和摘要须替换为真实绑定输入，参见 [CLI 合同与请求格式](docs/adr/cli-contract.md)。Gate 根据自身 ALLOW/BLOCK/REQUIRE_APPROVAL 报告返回 `0`/`2`/`3`；错误与显式取消返回 `4`，前绑定 stdout 为空、绑定后 decision 为 null。其他命令遵从各自合同中的退出语义。`--report` 被拒绝，`--report-file` 仅用于证据输入。没有按任务 ID 推测候选或执行动作的命令。CodeGuard 原生退出码保持命令特有语义，其 aggregate `3` 不能被解释为 FlowGuard 的 REQUIRE_APPROVAL。
 
 ## 设计与实施路线
 
@@ -59,4 +61,4 @@ flowguard gate check --task TASK-104 --action release
 
 ## OpenSpec 实施待办
 
-新增增量 [proposal](openspec/changes/add-evidence-bound-workflow-gates/proposal.md)、[design](openspec/changes/add-evidence-bound-workflow-gates/design.md)、[规范](openspec/changes/add-evidence-bound-workflow-gates/specs/) 与 [tasks](openspec/changes/add-evidence-bound-workflow-gates/tasks.md)，将架构方案拆成待实施工作。参阅[跨仓依赖路线图](openspec/guard-roadmap.md)与[结构验证记录](openspec/validation-2026-10-09.md)。所有新增实施任务保持未勾选；本分支新增规划，不新增产品功能。前文源码树清单和验证限制对应检查基线或较早的架构审阅阶段；本次另行新增 OpenSpec 文档并记录实际 CLI 校验。既有 change 的任务归属和历史完成证据继续保留。
+新增增量 [proposal](openspec/changes/add-evidence-bound-workflow-gates/proposal.md)、[design](openspec/changes/add-evidence-bound-workflow-gates/design.md)、[规范](openspec/changes/add-evidence-bound-workflow-gates/specs/) 与 [tasks](openspec/changes/add-evidence-bound-workflow-gates/tasks.md)，将架构方案拆成待实施工作。参阅[跨仓依赖路线图](openspec/guard-roadmap.md)与[结构验证记录](openspec/validation-2026-10-09.md)。已独立验收的本地任务记录在清单中，剩余任务保持未勾选。前文源码树清单和验证限制对应检查基线或较早的架构审阅阶段；本次另行新增 OpenSpec 文档并记录实际 CLI 校验。既有 change 的任务归属和历史完成证据继续保留。

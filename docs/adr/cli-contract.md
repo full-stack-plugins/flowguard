@@ -1,6 +1,6 @@
 # Read-only CLI v1alpha1
 
-Status: implemented, task5.1 local-profile independent review pending. No host service, network listener, persistent store activation, approval issuance or Git execution writer. Build with `cargo build --locked --bin flowguard` in the coordinated sibling checkout; executable is `target/debug/flowguard`.
+Status: implemented; task5.1 local-profile independent review accepted (see implementation progress). No host service, network listener, persistent store activation, approval issuance or Git execution writer. Build with `cargo build --locked --bin flowguard` in the coordinated sibling checkout; executable is `target/debug/flowguard`.
 
 ## Commands and exit status
 

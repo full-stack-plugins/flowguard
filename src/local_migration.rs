@@ -78,12 +78,15 @@ impl<'a> LocalStageRoute<'a> {
         self.declare(StageState::Invalidated, "invalidate")
     }
     pub fn set_mode(&mut self, mode: RouteMode) -> Result<(), QualificationError> {
-        self.capacity()?;
+        // Increasing authority needs an audit slot; stopping it must not.
+        if mode == RouteMode::OptIn {
+            self.capacity()?;
+        }
         self.mode = mode;
         self.append("route_changed")
     }
     pub fn rollback(&mut self) -> Result<(), QualificationError> {
-        self.capacity()?;
+        // Fail closed even if recording the stop returns Budget.
         self.mode = RouteMode::Advisory;
         self.append("rollback_new_route_stopped")
     }
@@ -117,13 +120,19 @@ impl<'a> LocalStageRoute<'a> {
         Ok(true)
     }
     pub fn edited(&mut self, plan: &'a ProtectedStagePlan) -> Result<(), QualificationError> {
-        self.capacity()?;
         if plan.stage_id() != self.plan.stage_id() || plan.digest() == self.plan.digest() {
             return Err(QualificationError::Binding);
         }
-        // Record invalidation under the old plan before changing the plan reference.
-        self.invalidate()?;
+        // Already-invalidated imports and subsequent edits stay unqualified;
+        // replacing their plan must not require qualifying the obsolete plan.
+        if self.state == StageState::Invalidated {
+            self.append("edited_while_invalidated")?;
+        } else {
+            // Stop consumption even when the audit append runs out of space.
+            self.invalidate()?;
+        }
         self.plan = plan;
+        self.receipt = None;
         Ok(())
     }
     pub fn consume(
@@ -158,7 +167,11 @@ impl<'a> LocalStageRoute<'a> {
         Ok(())
     }
     fn declare(&mut self, state: StageState, event: &str) -> Result<(), QualificationError> {
-        self.capacity()?;
+        // Invalidating a satisfying state revokes the retained receipt before
+        // attempting to append. Submission still requires available history.
+        if state != StageState::Invalidated {
+            self.capacity()?;
+        }
         self.state = StageDeclaration::observed(self.state)
             .apply_declaration(state)
             .map_err(|_| QualificationError::Transition)?

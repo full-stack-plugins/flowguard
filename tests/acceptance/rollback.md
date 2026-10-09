@@ -14,3 +14,8 @@ Runnable evidence: `cargo test --test approved_routing`.
 `edited_satisfied_stage_invalidates_before_resubmitting_new_plan` changes a graph source digest, freezes a new protected plan, invalidates the satisfied route, refuses pre-submission qualification and old approval, and accepts only the fresh new-plan approval.
 
 No real-host experiment or production authentication is represented by the fixture authority. These tests do not run or migrate legacy mutators, reset Git refs, alter external revocation records or modify CodeGuard. Historical old inherited/skipped states use the same history-only import path; authorization for either new mode remains in the already-tested typed qualification core.
+
+Review regression checks added after independent findings:
+
+- `exhausted_history_never_prevents_stopping_qualified_consumption` fills all 1,024 history slots on a qualified opt-in route and exercises rollback, invalidation, edited-plan invalidation, shadow and advisory switches. Each reports the unavailable audit append, refuses subsequent consumption, preserves historical bytes and refuses opt-in reactivation.
+- `invalidated_import_and_repeated_edits_keep_history_and_require_latest_approval` imports each old satisfying state, changes the protected plan twice while invalidated, preserves the original history prefix, refuses pre-submission qualification and the prior plan's approval, and accepts only the latest plan's fresh approval after submission.

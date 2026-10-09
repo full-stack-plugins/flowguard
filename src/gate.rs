@@ -502,10 +502,29 @@ impl PendingGate {
         })
     }
     pub(crate) fn input_failed(self, finished_at: &str) -> Result<GateRun, TransportDiagnostic> {
-        self.failed(RunStatus::Error, "gate.input_unavailable", finished_at)
+        self.finish_failure(
+            crate::transport::ObservedFailure::InvalidEvidence,
+            finished_at,
+        )
     }
     pub fn cancel(self, finished_at: &str) -> Result<GateRun, TransportDiagnostic> {
-        self.failed(RunStatus::Cancelled, "gate.cancelled", finished_at)
+        self.finish_failure(crate::transport::ObservedFailure::Cancelled, finished_at)
+    }
+    /// Complete this exact prepared attempt with a controller-observed failure.
+    /// This does not spawn, cancel, time out, or sandbox the controller's worker.
+    pub fn finish_failure(
+        self,
+        failure: crate::transport::ObservedFailure,
+        finished_at: &str,
+    ) -> Result<GateRun, TransportDiagnostic> {
+        use crate::transport::ObservedFailure::*;
+        let (status, code) = match failure {
+            RuntimeCrash => (RunStatus::Error, "gate.runtime_failed"),
+            Timeout => (RunStatus::Error, "gate.timed_out"),
+            InvalidEvidence => (RunStatus::Error, "gate.input_unavailable"),
+            Cancelled => (RunStatus::Cancelled, "gate.cancelled"),
+        };
+        self.failed(status, code, finished_at)
     }
     fn failed(
         self,

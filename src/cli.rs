@@ -11,11 +11,7 @@ pub struct CliOutput {
     pub stderr: String,
 }
 fn failure() -> CliOutput {
-    CliOutput {
-        code: 4,
-        stdout: vec![],
-        stderr: "flowguard: invalid or unavailable command input\n".into(),
-    }
+    crate::transport::prebinding_error()
 }
 fn json(code: u8, value: impl Serialize) -> Result<CliOutput, ()> {
     let mut stdout = serde_json::to_vec(&value).map_err(|_| ())?;
@@ -369,17 +365,7 @@ fn gate(args: &[String]) -> Result<CliOutput, ()> {
     gate_json(run, fixture)
 }
 fn gate_json(run: GateRun, fixture: bool) -> Result<CliOutput, ()> {
-    let code = match (&run.envelope().run_status, &run.envelope().decision) {
-        (RunStatus::Completed, Some(guardengine::Decision::Allow)) => 0,
-        (RunStatus::Completed, Some(guardengine::Decision::Block)) => 2,
-        (RunStatus::Completed, Some(guardengine::Decision::RequireApproval)) => 3,
-        _ => 4,
-    };
-    let artifacts=run.artifacts().map(|a|->Result<serde_json::Value,()>{Ok(serde_json::json!({"contract":std::str::from_utf8(a.contract).map_err(|_|())?,"facts":std::str::from_utf8(a.facts).map_err(|_|())?,"report":std::str::from_utf8(a.report).map_err(|_|())?,"domain":serde_json::to_string(run.domain().ok_or(())?).map_err(|_|())?}))}).transpose()?;
-    json(
-        code,
-        serde_json::json!({"apiVersion":"flowguard.cli/v1alpha1","command":"gate check","authority_profile":if fixture{"local_fixture"}else{"unavailable"},"execution_authorized":false,"envelope":run.envelope(),"artifacts":artifacts}),
-    )
+    crate::transport::encode_gate(&run, fixture).map_err(|_| ())
 }
 #[derive(Default, Deserialize)]
 #[serde(deny_unknown_fields)]

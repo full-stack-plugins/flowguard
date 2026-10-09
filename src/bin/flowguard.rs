@@ -6,11 +6,7 @@ fn main() -> std::process::ExitCode {
         .collect();
     let output = match args {
         Ok(args) => flowguard::cli::run(args),
-        Err(_) => flowguard::cli::CliOutput {
-            code: 4,
-            stdout: vec![],
-            stderr: "flowguard: invalid arguments\n".into(),
-        },
+        Err(_) => flowguard::transport::prebinding_error(),
     };
     if std::io::stdout().write_all(&output.stdout).is_err()
         || std::io::stderr()

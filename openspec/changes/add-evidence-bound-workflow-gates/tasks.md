@@ -70,8 +70,8 @@
 
 接口：`RunStore.append(AttemptEvent)`、`publish_if_current(Binding, ExpectedGeneration, ResultRef)`；`invalidate(ChangeCause, DependencyGraph) -> AffectedEligibility`。组 3 的所需真实 provider 加 GE-TRUST 是可信消费前提；本组不引入 privileged Git executor。
 
-- [ ] 4.1 在 `src/run_store.rs` 与 `schemas/workflow/attempt.json` 分离 runId/幂等键，定义追加记录与授权存储目录；`tests/attempt_identity.rs` 覆盖同请求去重、重试新 runId、同键异摘要、worktree 路径复用。验收：无跨需求覆盖，check 未启用持久化时不隐式写源文档。对应 **Immutable attempt isolation and conditional publication**。
-- [ ] 4.2 在 `src/run_store.rs` 实现 binding+generation CAS，`tests/concurrent_publication.rs` 同时运行 A/head1、A/head2、B 并延迟旧 ALLOW，注入写中断/重启。验收：旧结果仅历史、当前指针不回退；多进程支持只有事务实现与故障验证通过后才能声明。对应 **Immutable attempt isolation and conditional publication**。
+- [x] 4.1 在 `src/run_store.rs` 与 `schemas/workflow/attempt.json` 分离 runId/幂等键，定义追加记录与授权存储目录；`tests/attempt_identity.rs` 覆盖同请求去重、重试新 runId、同键异摘要、worktree 路径复用。验收：无跨需求覆盖，check 未启用持久化时不隐式写源文档。对应 **Immutable attempt isolation and conditional publication**。
+- [x] 4.2 在 `src/run_store.rs` 实现 binding+generation CAS，`tests/concurrent_publication.rs` 同时运行 A/head1、A/head2、B 并延迟旧 ALLOW，注入写中断/重启。验收：旧结果仅历史、当前指针不回退；多进程支持只有事务实现与故障验证通过后才能声明。对应 **Immutable attempt isolation and conditional publication**。
 - [ ] 4.3 在 `src/invalidation.rs` 实现依赖资格失效传播；`tests/invalidation_matrix.rs` 逐项变更 candidate/base/group/source/rules/analyzer/config/coverage/baseline/dependency/expiry/revocation。验收：受影响闭包精确、无关需求不变、旧报告原字节保留，10 的发布集合联动正确。对应 **Dependency-aware eligibility invalidation**。
 - [ ] 4.4 在 `src/trust.rs`、`src/audit.rs` 接 GE-TRUST 的认证引用端口，并在 `docs/adr/audit-retention.md` 决定授权存储/脱敏/保留策略；`tests/trust_audit.rs` 覆盖 forged producer、凭据泄露、跨租户访问、必要工件过期及批准缓存后撤销。验收：复核当前批准而非缓存授权，缺工件失去资格，不由引擎签身份。对应 **Authenticated approval observations**、**Bounded access and auditable stage evidence**。
 - [ ] 4.5 在 `adapters/merge_queue/mod.rs` 消费认证控制器事件和 GG-CANDIDATE 只读对象；`tests/queue_candidate.rs` 以 A/B 分支合成 M1，再推进 base/重组为 M2。验收：只认精确 M2 及其需求集重算证据，head/M1 不顶替，错误事件身份拒绝。对应 **Exact merge-queue composition without executor dependency**。

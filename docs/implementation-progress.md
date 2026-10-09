@@ -97,3 +97,7 @@ No new checkboxes: 4.1/4.2 are now presented for local-profile acceptance review
 ## Independent full-work completion review fix
 
 Root reproduced old ALLOW completion accepted by a new same-run/candidate/coverage reservation whose producer principals had changed. Structural envelope checks were insufficient. Maintained RED reproduces this P2; GateRun now freezes original private full-work identity before evaluation, and both public stores accept only typed GateRun completion. Internal persistent replay verifies the recorded original work digest. Log schema advances to v1alpha2, old logs reject; no caller digest rebinding API. Fresh changed-policy evaluation remains correctly closed and can append its own error outcome. No task acceptance added pending independent fix review.
+
+## Durable independent acceptance registration
+
+Root closed full-work completion P2 at `1ffd34a` and accepted local **4.1/4.2** after independent59-test/3-schema-vector recheck; evidence `/workspace/guard-implementation-ledger/flowguard-full-work-independent-review.md`. Accepted total is **10/30**. Owner-private cooperative Linux local-filesystem limitations remain: no hardware power-loss/network filesystem/hostile same-UID claim. Earlier pending-review entries are historical. CLI5.1 is now in progress and remains unchecked.

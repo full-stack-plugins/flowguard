@@ -1,0 +1,12 @@
+{
+  "version": "v999",
+  "repo_id": "repo",
+  "stage": "02-architecture",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "content_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+  "policy_digest": "sha256:823412d1eacb67956220e532959f0104603057c88704863ca38e7cd188fda812",
+  "approval_ref": "fixture:approval",
+  "requirements": [
+    "A"
+  ]
+}

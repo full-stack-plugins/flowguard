@@ -1,0 +1,19 @@
+{
+  "version": "flowguard.workflow/v1",
+  "context_digest": "sha256:80f70afeef3caa57646fd20afb95be9c3f2c03d38e091906de31838813dcc22e",
+  "baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+  "graph_digest": "sha256:eef93e1d14482804277fca0172464032d1a4fdbcc338524059fa1e861454ad4d",
+  "obligations": [
+    {
+      "stage_id": "A/01",
+      "guard": "specguard",
+      "coverage": [
+        "A"
+      ],
+      "rules_digest": "sha256:6c621d1a05138a7888d37d9269a9da8e2e11e4aced2f6cfd24b05ab1b9e61bb0",
+      "analyzer_version": "1.0"
+    }
+  ],
+  "missing_stages": [],
+  "digest": "sha256:16b0e17aed1de41f786c710c84c82ec8602ae9c5c8ffc17073c9c08db7c48086"
+}

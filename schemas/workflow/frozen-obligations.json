@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowguard.local/schemas/workflow/v1/frozen-obligations",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "flowguard.workflow/v1"
+    },
+    "context_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "baseline_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "graph_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*"
+          },
+          "guard": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*"
+          },
+          "coverage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": ".*\\S.*"
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "rules_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "analyzer_version": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": ".*\\S.*"
+          }
+        },
+        "required": [
+          "stage_id",
+          "guard",
+          "coverage",
+          "rules_digest",
+          "analyzer_version"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "missing_stages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": ".*\\S.*"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "version",
+    "context_digest",
+    "baseline_digest",
+    "graph_digest",
+    "obligations",
+    "missing_stages",
+    "digest"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "version": "v999",
+  "id": "A/01",
+  "stage": "01-requirements",
+  "owner": "A",
+  "source_digest": "sha256:41cf6794ba4200b839c53531555f0f3998df4cbb01a4d5cb0b94e3ca5e23947d",
+  "dependencies": []
+}

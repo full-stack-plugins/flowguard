@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowguard.local/schemas/workflow/v1/baseline-ref",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "flowguard.workflow/v1"
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "stage": {
+      "enum": [
+        "02-architecture",
+        "07-standards"
+      ]
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "approval_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": ".*\\S.*"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    }
+  },
+  "required": [
+    "version",
+    "repo_id",
+    "stage",
+    "revision",
+    "content_digest",
+    "policy_digest",
+    "approval_ref",
+    "requirements"
+  ]
+}

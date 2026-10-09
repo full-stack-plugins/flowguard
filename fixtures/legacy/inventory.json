@@ -1,0 +1,33 @@
+{
+  "repository": "https://github.com/full-stack-plugins/flowguard-plugin",
+  "commit": "13b52b054c31f614dc272b18c195b8fa929aa595",
+  "manifestVersion": "0.4.2",
+  "license": "Apache-2.0",
+  "sourceVerified": true,
+  "compatibility": "unsupported",
+  "hostEnforcement": "unverified",
+  "sources": {
+    "manifest": "plugin.json",
+    "license": "LICENSE",
+    "stages": "scripts/flowguard_lib/registry.py",
+    "layoutAndStates": "scripts/flowguard_lib/stage_docs.py",
+    "commands": "scripts/flowguard_state.py",
+    "hooks": "hooks/hooks.json"
+  },
+  "executed": [
+    "python3 scripts/flowguard_state.py --help",
+    "test_registry.py: 4 passed",
+    "test_stage_transitions.py: 8 passed (explicit isolated state root)"
+  ],
+  "unverified": [
+    "full legacy suite",
+    "legacy/new differential",
+    "real host hook protection",
+    "approval authenticity"
+  ],
+  "knownDifferences": [
+    "new invalidated state requires resubmission",
+    "new content hash includes all bytes",
+    "new ready-node ordering is lexicographic"
+  ]
+}

@@ -32,9 +32,12 @@ fn actual_archguard_source_scope_is_frozen_before_evidence_and_consumed_without_
     let result = f.producer.run(&AtomicBool::new(false)).unwrap();
     result.verify(&f.repo, &f.candidate).unwrap();
     let raw = serde_json::to_vec(&result).unwrap();
-    let verified =
-        archguard::integration::binding::GitEvidenceBundle::load(&raw, &f.repo, &f.candidate)
-            .unwrap();
+    let verified = archguard_git_spec::integration::binding::GitEvidenceBundle::load(
+        &raw,
+        &f.repo,
+        &f.candidate,
+    )
+    .unwrap();
     let evidence = verified.cargo();
     assert_eq!(
         evidence.envelope.binding.source_snapshot_digest,

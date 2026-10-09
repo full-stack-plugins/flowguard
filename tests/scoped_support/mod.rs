@@ -1,5 +1,6 @@
 #![allow(dead_code)]
-use archguard::integration::{binding::GitCargoEvidence, projection::ProtectedCargoPolicy};
+use archguard::integration::projection::ProtectedCargoPolicy;
+use archguard_git_spec::integration::binding::GitCargoEvidence;
 use flowguard::{context::*, dependencies::*, gate::obligation_scope, obligations::*};
 use guardengine::{
     integration::{eligibility::*, *},

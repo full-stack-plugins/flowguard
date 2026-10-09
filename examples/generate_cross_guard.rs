@@ -1,5 +1,6 @@
 //! Reproducible local fixture generator. Does not install tools or grant production authority.
-use archguard::integration::{binding::GitCargoEvidence, projection::ProtectedCargoPolicy};
+use archguard::integration::projection::ProtectedCargoPolicy;
+use archguard_git_spec::integration::binding::GitCargoEvidence;
 use flowguard::{context::*, dependencies::*, evidence::*, gate::obligation_scope, obligations::*};
 use gitguard::{
     Repository,

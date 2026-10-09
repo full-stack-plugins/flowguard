@@ -69,7 +69,7 @@ impl Fixture {
         let candidate: gitguard::candidate::CandidateSnapshot = read("gitguard/candidate.json");
         candidate.validate(&repo).unwrap();
         let ac: gitguard::candidate::CandidateSnapshot = read("archguard/candidate.json");
-        archguard::integration::binding::GitEvidenceBundle::load(
+        archguard_git_spec::integration::binding::GitEvidenceBundle::load(
             &bytes("archguard", "bundle.json"),
             &repo,
             &ac,

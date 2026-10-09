@@ -53,11 +53,15 @@ pub mod stage_qualification;
 
 pub mod accepted_stage;
 mod admission;
-pub mod transport;
 pub mod invalidation;
+pub mod transport;
 
 #[path = "../adapters/merge_queue/mod.rs"]
 pub mod merge_queue;
 
-pub mod trust;
 pub mod audit;
+pub mod trust;
+
+pub mod host;
+#[path = "../adapters/mcp/mod.rs"]
+pub mod mcp;

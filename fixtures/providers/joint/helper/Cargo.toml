@@ -1,0 +1,10 @@
+[package]
+name = "flowguard-joint-testguard-fixture"
+version = "0.1.0"
+edition = "2024"
+publish = false
+[dependencies]
+testguard = { path = "../../../../../testguard", version = "=0.1.0" }
+guardengine = { path = "../../../../../guardengine", version = "=0.1.0" }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.145"

@@ -58,3 +58,6 @@ pub mod invalidation;
 
 #[path = "../adapters/merge_queue/mod.rs"]
 pub mod merge_queue;
+
+pub mod trust;
+pub mod audit;

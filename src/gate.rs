@@ -93,6 +93,39 @@ pub struct GateRun {
     retained: Vec<RetainedEvidence>,
 }
 impl GateRun {
+    pub(crate) fn retained_size(&self, limit: usize) -> Result<usize, ()> {
+        struct Meter {
+            remaining: usize,
+        }
+        impl std::io::Write for Meter {
+            fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                self.remaining = self
+                    .remaining
+                    .checked_sub(bytes.len())
+                    .ok_or(std::io::ErrorKind::InvalidInput)?;
+                Ok(bytes.len())
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        use std::io::Write;
+        let mut meter = Meter { remaining: limit };
+        serde_json::to_writer(&mut meter, &self.envelope).map_err(|_| ())?;
+        serde_json::to_writer(&mut meter, &self.domain).map_err(|_| ())?;
+        for bytes in [&self.contract, &self.facts, &self.report] {
+            meter.write_all(bytes).map_err(|_| ())?;
+        }
+        for evidence in &self.retained {
+            serde_json::to_writer(&mut meter, &evidence.envelope).map_err(|_| ())?;
+            serde_json::to_writer(&mut meter, &evidence.policy).map_err(|_| ())?;
+            for bytes in [&evidence.contract, &evidence.facts, &evidence.report] {
+                meter.write_all(bytes).map_err(|_| ())?;
+            }
+        }
+        Ok(limit - meter.remaining)
+    }
+
     pub(crate) fn work_digest(&self) -> &str {
         &self.work_digest
     }

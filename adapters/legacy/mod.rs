@@ -58,9 +58,10 @@ pub fn observe(
         else {
             continue;
         };
-        let columns: Vec<_> = inner.split('|').map(str::trim).collect();
+        let mut columns = inner.split('|').map(str::trim);
+        let key = columns.next();
         if !matches!(
-            columns.first().copied(),
+            key,
             Some(
                 "任务"
                     | "父任务"
@@ -75,10 +76,11 @@ pub fn observe(
         ) {
             continue;
         }
-        if columns.len() != 2 {
+        let value = columns.next().ok_or("ambiguous legacy row")?;
+        if columns.next().is_some() {
             return Err("ambiguous legacy row");
         }
-        if rows.insert(columns[0], columns[1]).is_some() {
+        if rows.insert(key.unwrap(), value).is_some() {
             return Err("duplicate legacy field");
         }
     }

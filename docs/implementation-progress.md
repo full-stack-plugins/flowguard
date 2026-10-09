@@ -115,3 +115,7 @@ Root accepted local task **5.1** at `8c62afb`, based on `/workspace/guard-implem
 ## Fixed legacy declaration differential (review pending)
 
 Task5.2 local slice adds bounded read-only parsing of the surveyed exact legacy revision and fifteen captured actual legacy reads, including accepted/inherited/skipped/invalidated, malformed/unknown/fault inputs and duplicate/fenced-table differences. Forty-nine legacy transition pairs are compared to the existing FlowGuard transition owner. No old declaration supplies new evidence authority; migration stays unsupported. Capture replay is byte-identical. Four focused tests and the full71-test pinned regression pass; exact source pins and the initial moving-GitGuard regression failure are recorded in `/workspace/guard-implementation-ledger/flowguard-legacy-slice-report.md`. Task5.2 remains unchecked pending independent review; accepted total stays11/30.
+
+## Legacy parser allocation review fix (review pending)
+
+Root's independent2MiB delimiter-row probe reproduced a32MiB column-vector allocation before ignoring an unknown field. Replaced full split collection with borrowed field/value iteration and one third-column check. Existing ignore-unknown/reject-known-extra semantics remain. Real allocator regression covers both inputs; maximum observed allocation is4MiB for bounded source buffering, compared with32MiB before. Pinned full72-test suite plus unchanged original independent probe pass (73 total), with Clippy/fmt checks. No task acceptance added;5.2 remains pending independent fix review.

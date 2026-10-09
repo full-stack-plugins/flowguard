@@ -77,3 +77,7 @@ No new task box is checked. Tasks 1.2/3.1/3.2/3.4/3.5 remain partial until full 
 ## Controller-pinned local policy slice (review pending)
 
 `policy::load_and_freeze` adds explicit authorized-root reads, exact raw-byte pin checks, closed versioned policy decoding and exact context/baseline/graph matching before existing obligation freezing. No candidate-side auto-discovery or storage write is introduced. Six new policy tests plus existing suite pass (41 integration tests); focused RED evidence is retained in external implementation ledger. See [local-policy-loader ADR](adr/local-policy-loader.md). Tasks 2.5 and 3.1 remain partial; no new checkbox is accepted. The controller still owns pin provisioning, action applicability and upstream GE eligibility policies; this local integrity profile does not authenticate a production configuration source.
+
+## Second independent acceptance registration
+
+Root accepted local tasks **3.3 and 3.4** at commit `0a5e912`, based on `/workspace/guard-implementation-ledger/flowguard-gate-independent-review.md`. Total accepted: **8/30** (1.1/1.3/1.5/1.6/2.1/2.4/3.3/3.4). These are real engine projection and independent report semantics with synthetic authority fixtures, not production FG-GATE. Earlier pending-review statements above are historical. Task 1.4's RED gap remains; policy loader `bc4c315` awaits separate review.

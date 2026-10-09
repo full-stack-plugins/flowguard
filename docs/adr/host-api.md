@@ -51,7 +51,11 @@ permission-field refusal, unchanged source hashes and changed-source reread. It
 also tests negotiated version fallback, metadata, key rebinding/capacity,
 cancel/retry, traversal argument refusal, malformed/oversized JSON recovery and
 wrong launch digest. No Claude/Codex UI or any other client version is certified.
-The full original task remains pending independent review and scope acceptance.
+Task 5.3 is independently accepted for this first local stdio profile at
+`56a2c9576caf382a6bb5f716c707c77c94606599`: 14 related tests passed
+(host 5, CLI 8, scoped CLI 1 containing 13 scenarios), plus static review.
+This registers the defined port and capability matrix, without expanding the
+authentication, cancellation, or client compatibility limits above.
 
 Protocol references: [lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle),
 [stdio](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports),

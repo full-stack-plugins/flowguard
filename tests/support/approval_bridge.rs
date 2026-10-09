@@ -213,13 +213,39 @@ impl AuthorityProvider for FixtureAuthority {
                 NOW,
             )
             .map_err(|_| AuthorityError::Untrusted)?;
+            if e.binding.baseline_digest.as_deref()
+                != Some(specguard::model::digest(&self.baseline).as_str())
+            {
+                return Err(AuthorityError::Untrusted);
+            }
         }
 
-        self.records
+        let mut record = self
+            .records
             .get(d)
             .filter(|r| r.producer == e.producer)
             .cloned()
-            .ok_or(AuthorityError::Untrusted)
+            .ok_or(AuthorityError::Untrusted)?;
+        if e.producer.guard == "SpecGuard" {
+            // This fixture validates the independent baseline identity at NOW,
+            // but that observation must never outlive either baseline window.
+            // GE checks this intersection against the *actual consumption time*.
+            record.validity.issued_at = record
+                .validity
+                .issued_at
+                .max(self.baseline.effective_from)
+                .max(self.baseline_auth.issued_at);
+            record.validity.expires_at = record
+                .validity
+                .expires_at
+                .min(self.baseline.expires_at)
+                .min(self.baseline_auth.expires_at);
+            record.validity.revoked |= self.baseline_auth.revoked;
+            if record.validity.issued_at >= record.validity.expires_at {
+                return Err(AuthorityError::Untrusted);
+            }
+        }
+        Ok(record)
     }
     fn verify_approval(&self, reference: &str) -> Result<ApprovalRecord, AuthorityError> {
         if reference != "fixture:actual-spec-review" {

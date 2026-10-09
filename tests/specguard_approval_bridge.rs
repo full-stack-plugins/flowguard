@@ -311,3 +311,48 @@ fn original_capture_hashes_and_all_required_providers_remain_bound() {
         );
     }
 }
+
+#[test]
+fn actual_consumption_time_checks_each_independent_baseline_and_review_window() {
+    let f = Fixture::new();
+    let captures = captures();
+    let evidence: Vec<_> = captures
+        .iter()
+        .zip(PROVIDERS)
+        .map(|(c, name)| c.evidence(&f.scopes[name]))
+        .collect();
+    for case in 0..7 {
+        let mut authority = FixtureAuthority::new();
+        authority.baseline_auth.expires_at = i64::MAX;
+        authority.approval.as_mut().unwrap().validity.expires_at = i64::MAX;
+        let mut now = NOW + 2;
+        match case {
+            0 => authority.baseline_auth.expires_at = NOW + 1,
+            1 => now = authority.baseline.expires_at + 1,
+            2 => authority.approval.as_mut().unwrap().validity.expires_at = NOW + 1,
+            3 => {
+                authority.baseline_auth.issued_at = NOW - 1;
+                now = NOW - 2;
+            }
+            4 => {
+                now = authority.baseline.effective_from - 1;
+                authority.baseline_auth.issued_at = now - 10;
+                authority.approval.as_mut().unwrap().validity.issued_at = now - 10;
+            }
+            5 => {
+                authority.approval.as_mut().unwrap().validity.issued_at = NOW - 1;
+                now = NOW - 2;
+            }
+            _ => (),
+        }
+        let result = f
+            .pending()
+            .evaluate(&evidence, &authority, now, TIME)
+            .unwrap();
+        assert_eq!(
+            result.envelope().decision == Some(Decision::Allow),
+            case == 6,
+            "window case {case}"
+        );
+    }
+}

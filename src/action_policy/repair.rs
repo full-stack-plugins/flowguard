@@ -241,15 +241,23 @@ impl RepairReceipt<'_> {
         provider: &dyn AuthorityProvider,
         now: i64,
     ) -> Result<(), RepairError> {
-        if current.digest != self.plan.digest {
-            return Err(RepairError::Binding);
-        }
         if now < self.last_checked.get() {
             return Err(RepairError::Clock);
         }
-        self.plan
-            .validate(c, self.paths, self.approval, now, provider)?;
+        // Observing time is irreversible even when validation fails. Publish the
+        // watermark before invoking authority, which may reenter this receipt.
         self.last_checked.set(now);
-        Ok(())
+        if current.digest != self.plan.digest {
+            return Err(RepairError::Binding);
+        }
+        let result = self
+            .plan
+            .validate(c, self.paths, self.approval, now, provider);
+        // A nested refresh may have observed a later time. Never overwrite it or
+        // return this older result as a current authorization observation.
+        if self.last_checked.get() != now {
+            return Err(RepairError::Clock);
+        }
+        result
     }
 }

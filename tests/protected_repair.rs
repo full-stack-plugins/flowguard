@@ -610,3 +610,107 @@ fn legacy_assessment_rejects_empty_applicability_without_querying_authority() {
         assert_eq!(assess(action, &p, &MustNotFetch, &q).unwrap(), expected);
     }
 }
+
+#[test]
+fn independent_expired_refresh_cannot_reopen_earlier_clock() {
+    let (_dir, b) = binding();
+    let g = graph();
+    let mut c = Controller::default();
+    let (stage, run, frozen) = missing_testguard(&b, &g, &mut c);
+    assert_eq!(run.envelope().decision, Some(guardengine::Decision::Block));
+    let policy = ActionPolicy {
+        required_stages: g.nodes().keys().cloned().collect(),
+        allow_test_repair: true,
+    };
+    let context = RepairContext {
+        stage_plan: &stage,
+        binding: &b,
+        frozen: &frozen,
+        policy: &policy,
+    };
+    let paths = BTreeSet::from(["tests/new_case.rs".into()]);
+    let plan = ProtectedRepairPlan::freeze(&context, &paths, NOW).unwrap();
+    approve_repair(&mut c, &plan); // expires at NOW + 20
+    let request = RepairRequest {
+        action: Action::WriteTests,
+        paths: &paths,
+        approval_reference: "repair",
+        now: NOW,
+    };
+    let receipt = plan.authorize(&context, &request, &c).unwrap();
+    assert!(receipt.refresh(&plan, &context, &c, NOW + 1).is_ok());
+    assert_eq!(
+        receipt.refresh(&plan, &context, &c, NOW + 20),
+        Err(flowguard::action_policy::RepairError::Approval)
+    );
+    assert_eq!(
+        receipt.refresh(&plan, &context, &c, NOW + 2),
+        Err(flowguard::action_policy::RepairError::Clock),
+        "failed expiry check must advance observed time; approval cannot revive after rollback"
+    );
+}
+
+#[test]
+fn reentrant_authority_refresh_cannot_overwrite_a_newer_observed_time() {
+    use guardengine::integration::{GuardRunEnvelope, eligibility::*};
+    type Callback<'a> = Box<dyn Fn(&Reentrant<'a>) + 'a>;
+    struct Reentrant<'a> {
+        controller: &'a Controller,
+        callback: std::cell::RefCell<Option<Callback<'a>>>,
+    }
+    impl AuthorityProvider for Reentrant<'_> {
+        fn verify_producer(
+            &self,
+            _: &GuardRunEnvelope,
+            _: &str,
+        ) -> Result<ProducerRecord, AuthorityError> {
+            Err(AuthorityError::Unavailable)
+        }
+        fn verify_approval(&self, reference: &str) -> Result<ApprovalRecord, AuthorityError> {
+            let callback = self.callback.borrow_mut().take();
+            if let Some(callback) = callback {
+                callback(self);
+            }
+            self.controller.verify_approval(reference)
+        }
+    }
+    let (_dir, b) = binding();
+    let g = graph();
+    let mut c = Controller::default();
+    let (stage, _, frozen) = missing_testguard(&b, &g, &mut c);
+    let policy = ActionPolicy {
+        required_stages: g.nodes().keys().cloned().collect(),
+        allow_test_repair: true,
+    };
+    let context = RepairContext {
+        stage_plan: &stage,
+        binding: &b,
+        frozen: &frozen,
+        policy: &policy,
+    };
+    let paths = BTreeSet::from(["tests/new_case.rs".into()]);
+    let plan = ProtectedRepairPlan::freeze(&context, &paths, NOW).unwrap();
+    approve_repair(&mut c, &plan);
+    let request = RepairRequest {
+        action: Action::WriteTests,
+        paths: &paths,
+        approval_reference: "repair",
+        now: NOW,
+    };
+    let receipt = plan.authorize(&context, &request, &c).unwrap();
+    let provider = Reentrant {
+        controller: &c,
+        callback: std::cell::RefCell::new(Some(Box::new(|provider| {
+            assert!(receipt.refresh(&plan, &context, provider, NOW + 3).is_ok());
+        }))),
+    };
+    assert_eq!(
+        receipt.refresh(&plan, &context, &provider, NOW + 2),
+        Err(flowguard::action_policy::RepairError::Clock)
+    );
+    assert_eq!(
+        receipt.refresh(&plan, &context, &c, NOW + 2),
+        Err(flowguard::action_policy::RepairError::Clock)
+    );
+    assert!(receipt.refresh(&plan, &context, &c, NOW + 4).is_ok());
+}

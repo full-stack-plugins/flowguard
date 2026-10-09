@@ -6,11 +6,13 @@
 
 ## Current status and evidence
 
-Inspected baseline: `a6bd25fc38b0a323f880bedd395373d3bb672826` (2026-10-09). The tracked tree contains only this README, its Chinese counterpart, `docs/architecture.md`, and `docs/technical-design.md`. There is **no executable, source tree, manifest, test suite, CI configuration, or OpenSpec tree**. All runtime behavior and commands below are proposals; no runtime tests or OpenSpec validation are claimed.
+The original baseline `a6bd25f` was documentation-only. This branch now has a Rust library, read-only CLI, actual GuardEngine/GitGuard integration, explicit fixture authority, and local durable attempt storage. **10/30 tasks** have independent local-profile acceptance; CLI5.1 is pending review. See [implementation progress](docs/implementation-progress.md). No production provider, host enforcement or merge/release execution is provided.
 
-The external [flowguard-plugin](https://github.com/full-stack-plugins/flowguard-plugin) is an **unverified compatibility target**. Its source, releases, Python `flowguard_lib`, hooks, and [referenced ten-stage specification](https://github.com/full-stack-plugins/flowguard-plugin/blob/main/docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md) were not inspected in this review. Earlier repository documents described these components; that is not evidence that they exist or behave as described. Migration must pin and inspect a real revision before making parity claims.
+The external plugin was inspected at fixed SHA `13b52b054c31f614dc272b18c195b8fa929aa595`; see the [compatibility ADR](docs/adr/legacy-compatibility.md). This is source-backed investigation, not full legacy parity or migration acceptance.
 
-## Proposed ten-stage compatibility model
+Build: `cargo build --locked --bin flowguard` in the coordinated checkout with sibling guardengine/gitguard/specguard crates. Available commands: `discover`, `stage status`, `evidence verify`, `gate check`. See the [exact CLI contract, inputs and fixture limits](docs/adr/cli-contract.md). Gate defaults to unavailable authority; synthetic authority requires explicit fixture opt-in. No `--report` output flag exists.
+
+## Ten-stage source layout
 
 | Stage | Scope | Document under the consuming project's `docs/` |
 |---|---|---|
@@ -25,7 +27,7 @@ The external [flowguard-plugin](https://github.com/full-stack-plugins/flowguard-
 | 09 Documentation delivery | Feature | `features/<feature>/09-docs.md` |
 | 10 Release delivery | Project | `project/10-release.md` |
 
-These retained design assumptions need external compatibility verification. Do not create a second `.flowguard/` project tree or duplicate native OpenSpec/Spec Kit task records. Superpowers is an execution methodology, not an approval authority. Project stage inheritance must bind immutable baseline references and authenticated approval records; a Markdown `accepted` value is insufficient.
+Source discovery implements this fixed layout; full legacy behavior compatibility remains unverified. Do not create a second `.flowguard/` project tree or duplicate native OpenSpec/Spec Kit task records. Superpowers is an execution methodology, not an approval authority. Project stage inheritance must bind immutable baseline references and authenticated approval records; a Markdown `accepted` value is insufficient.
 
 ## Target workflow and boundaries
 
@@ -37,7 +39,7 @@ Native specification + task/worktree + protected baseline → frozen stage oblig
 - The trusted merge-queue controller recomputes obligations and evidence for the exact integration candidate. GitGuard checks Git-domain conditions; the hosting platform executes the protected merge. FlowGuard does not merge or release.
 - `ALLOW` is a scoped technical decision. Missing approval can yield `REQUIRE_APPROVAL` only when required analysis is complete; incomplete evidence and tool failures cannot be waived by approval. Reads, clarification, and authorized remediation remain available.
 
-FlowGuard’s proposed gate check produces its own engine-backed report over stage-obligation facts. Its envelope decision and exit code reflect that report, not a rewritten specialist verdict. A specialist `REQUIRE_APPROVAL` remains unchanged after external approval; a new FlowGuard evaluation may find that the scoped review obligation is satisfied. Action eligibility is recorded separately in a domain artifact, and the trusted controller still authorizes execution. The fact projection and protected gate rules require implementation and parity fixtures before use.
+FlowGuard’s local gate check produces its own engine-backed report over stage-obligation facts. Its envelope decision and exit code reflect that report, not a rewritten specialist verdict. A specialist `REQUIRE_APPROVAL` remains unchanged after external approval; a new FlowGuard evaluation may find that the scoped review obligation is satisfied. Action eligibility is recorded separately in a domain artifact, and the trusted controller still authorizes execution. The local projection uses real engine fixtures; production protected policy/provider parity remains separate.
 
 Current GuardEngine protocol `guard.partme.ai/v1alpha1` is distinct from the proposed [integration envelope](docs/integration-contract.md). It supports strict GuardContract/GuardFacts/GuardReport and exact `forbid_relation`, not FlowGuard stage or approval objects. Reports are unsigned; recomputation establishes consistency, not provenance or authority.
 
@@ -59,4 +61,4 @@ Read the [architecture](docs/architecture.md), [technical design and acceptance 
 
 ## OpenSpec implementation backlog
 
-The incremental [proposal](openspec/changes/add-evidence-bound-workflow-gates/proposal.md), [design](openspec/changes/add-evidence-bound-workflow-gates/design.md), [requirements](openspec/changes/add-evidence-bound-workflow-gates/specs/) and [tasks](openspec/changes/add-evidence-bound-workflow-gates/tasks.md) translate the architecture into pending implementation work. See the [cross-repository dependency roadmap](openspec/guard-roadmap.md) and [structural validation record](openspec/validation-2026-10-09.md). Every new implementation task remains unchecked; this branch adds planning artifacts, not product features. Earlier source-tree inventories and validation limitations describe the inspected baseline or earlier architecture-review stage; this planning stage adds OpenSpec artifacts and separately records actual CLI validation. Existing change ownership and historical completion evidence remain intact.
+The incremental [proposal](openspec/changes/add-evidence-bound-workflow-gates/proposal.md), [design](openspec/changes/add-evidence-bound-workflow-gates/design.md), [requirements](openspec/changes/add-evidence-bound-workflow-gates/specs/) and [tasks](openspec/changes/add-evidence-bound-workflow-gates/tasks.md) translate the architecture into pending implementation work. See the [cross-repository dependency roadmap](openspec/guard-roadmap.md) and [structural validation record](openspec/validation-2026-10-09.md). Reviewed local task acceptances are recorded in the task checklist; remaining work stays unchecked. Earlier source-tree inventories and validation limitations describe the inspected baseline or earlier architecture-review stage; this planning stage adds OpenSpec artifacts and separately records actual CLI validation. Existing change ownership and historical completion evidence remain intact.

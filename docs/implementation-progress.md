@@ -101,3 +101,9 @@ Root reproduced old ALLOW completion accepted by a new same-run/candidate/covera
 ## Durable independent acceptance registration
 
 Root closed full-work completion P2 at `1ffd34a` and accepted local **4.1/4.2** after independent59-test/3-schema-vector recheck; evidence `/workspace/guard-implementation-ledger/flowguard-full-work-independent-review.md`. Accepted total is **10/30**. Owner-private cooperative Linux local-filesystem limitations remain: no hardware power-loss/network filesystem/hostile same-UID claim. Earlier pending-review entries are historical. CLI5.1 is now in progress and remains unchecked.
+
+## Read-only CLI5.1 slice (review pending)
+
+Added actual binary and all four command paths: discover, stage status (source-observation scope, qualification unassessed), evidence verify (integrity only), gate check (real GG binding and GE FlowGuard report). Strict pinned request and explicit separate fixture-authority options; no production actor inference, output writes or persistent-store activation. Actual binary tests cover0/2/3/4, malformed prebinding empty stdout, bound error/null and requested cancellation, default unavailable authority, partial missing provider, revoked records reloaded, unknown --report, exact output artifact bytes and immutable upstream REQUIRE_APPROVAL when a new approved envelope is supplied.
+
+The local CLI profile is ready for independent review; task5.1 remains unchecked. Signal/process-death supervision and authenticated host clocks remain outside the synchronous CLI profile. See [CLI ADR](adr/cli-contract.md).

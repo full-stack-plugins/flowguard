@@ -457,6 +457,9 @@ impl PendingGate {
             retained,
         })
     }
+    pub(crate) fn input_failed(self, finished_at: &str) -> Result<GateRun, TransportDiagnostic> {
+        self.failed(RunStatus::Error, "gate.input_unavailable", finished_at)
+    }
     pub fn cancel(self, finished_at: &str) -> Result<GateRun, TransportDiagnostic> {
         self.failed(RunStatus::Cancelled, "gate.cancelled", finished_at)
     }

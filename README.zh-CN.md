@@ -6,9 +6,9 @@
 
 ## 当前状态与证据
 
-本次检查基线：`a6bd25fc38b0a323f880bedd395373d3bb672826`（2026-10-09）。受版本控制的文件只有本 README、英文版、`docs/architecture.md` 和 `docs/technical-design.md`。**没有可执行程序、源码目录、包清单、测试集、CI 配置或 OpenSpec 目录。** 下文的运行行为与命令均为提案；未宣称执行了运行时测试或 OpenSpec 校验。
+原始基线 `a6bd25f` 只有设计文档；当前分支已有 Rust 库、四个只读 CLI 命令、真实 GE/GG 接口、显式 fixture 权限端口和本地持久运行存储。**10/30 项**已有独立本地 profile 验收，CLI5.1 待审查。详见 [实施进展](docs/implementation-progress.md)。生产权限提供方、宿主强制保护与 merge/release 执行尚未提供。
 
-外部 [flowguard-plugin](https://github.com/full-stack-plugins/flowguard-plugin) 是**尚未验证的兼容目标**。本次未检查其源码、发布版本、Python `flowguard_lib`、Hooks 或[既有文档引用的十阶段规格](https://github.com/full-stack-plugins/flowguard-plugin/blob/main/docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md)。旧设计文档提及这些组件，不等于证明其存在或行为正确；迁移前必须锁定并检查真实修订。
+外部插件已按 SHA `13b52b054c31f614dc272b18c195b8fa929aa595` 调查，见 [兼容性 ADR](docs/adr/legacy-compatibility.md)；不等于完整行为一致或迁移验收。运行 `cargo build --locked --bin flowguard` 构建，依赖同级 GE/GG/SG 源码。命令为 `discover`、`stage status`、`evidence verify`、`gate check`。参数与 fixture 边界见 [CLI 合同](docs/adr/cli-contract.md)，默认权限不可用，未实现 `--report` 输出参数。
 
 ## 拟兼容的十阶段模型
 

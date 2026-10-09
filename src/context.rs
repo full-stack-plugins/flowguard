@@ -2,7 +2,8 @@
 //! Local caller identity remains advisory; failures are pre-binding diagnostics.
 use gitguard::{Repository, candidate::CandidateSnapshot};
 use guardengine::integration::RunBinding;
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct InvocationInput {
     pub repo_candidates: Vec<String>,
     pub task_candidates: Vec<String>,

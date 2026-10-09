@@ -81,3 +81,9 @@ No new task box is checked. Tasks 1.2/3.1/3.2/3.4/3.5 remain partial until full 
 ## Second independent acceptance registration
 
 Root accepted local tasks **3.3 and 3.4** at commit `0a5e912`, based on `/workspace/guard-implementation-ledger/flowguard-gate-independent-review.md`. Total accepted: **8/30** (1.1/1.3/1.5/1.6/2.1/2.4/3.3/3.4). These are real engine projection and independent report semantics with synthetic authority fixtures, not production FG-GATE. Earlier pending-review statements above are historical. Task 1.4's RED gap remains; policy loader `bc4c315` awaits separate review.
+
+## Process-local run store slice (review pending)
+
+Added `MemoryRunStore`: actual PendingGate-derived full work identity, separate idempotency/run IDs, immutable terminal-envelope bytes, mutex-atomic generation advance, single-assignment publication, and independent target histories. Seven tests cover duplicates/conflicts, authority-policy drift, changed-work late actual ALLOW after BLOCK, concurrent CAS/publication, and A/B use of one real Git worktree. Full suite: 48 locked integration tests passed; fmt/clippy/diff checks passed against updated GE c80ec32 local tree. See [memory store ADR](adr/memory-run-store.md).
+
+This completes only the explicit single-process memory profile of 4.1/4.2; tasks remain unchecked because persistent authorized-directory/schema, crash/restart fault tests and multiprocess behavior are absent. Storage validates structure/binding and never caches authority or grants eligibility. No push or execution writes.

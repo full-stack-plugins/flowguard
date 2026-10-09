@@ -59,6 +59,7 @@ pub struct SpecialistEvidence<'a> {
     pub artifacts: ArtifactBytes<'a>,
 }
 pub struct PendingGate {
+    run_id: String,
     attempt: BoundAttempt,
     binding: RunBinding,
     binding_digest: String,
@@ -211,6 +212,7 @@ pub fn prepare_gate(
         return Err(error("gate.policy_scope"));
     }
     let required: Vec<_> = required.into_iter().collect();
+    let run_id = request.run_id.clone();
     let attempt = prepare_attempt(InvocationDraft {
         run_id: request.run_id,
         producer: Some(Producer {
@@ -225,6 +227,7 @@ pub fn prepare_gate(
         started_at: request.started_at,
     })?;
     Ok(PendingGate {
+        run_id,
         attempt,
         binding: binding.binding().clone(),
         binding_digest: binding.domain_digest(),
@@ -236,6 +239,40 @@ pub fn prepare_gate(
     })
 }
 impl PendingGate {
+    pub(crate) fn store_identity(&self) -> crate::run_store::WorkIdentity {
+        let target = crate::digest(
+            &serde_json::to_vec(&(
+                &self.binding.repo_id,
+                &self.binding.task_id,
+                &self.binding.worktree_id,
+                &self.binding.requirement_ids,
+                &self.action,
+            ))
+            .expect("closed store target"),
+        );
+        let digest = crate::digest(
+            &serde_json::to_vec(&(
+                "flowguard.work/v1alpha1",
+                &self.binding,
+                &self.binding_digest,
+                &self.frozen_digest,
+                &self.required,
+                &self.action,
+                &self.policies,
+                crate::projection::MAPPING_VERSION,
+                env!("CARGO_PKG_VERSION"),
+            ))
+            .expect("closed work identity"),
+        );
+        crate::run_store::WorkIdentity {
+            target,
+            digest,
+            run_id: self.run_id.clone(),
+            binding: self.binding.clone(),
+            required: self.required.clone(),
+        }
+    }
+
     pub fn required_scopes(&self) -> &[String] {
         &self.required
     }

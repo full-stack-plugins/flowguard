@@ -17,4 +17,5 @@ libc = "=0.2.177"
 tempfile = "=3.23.0"
 
 [dev-dependencies]
+archguard = { path = "../archguard", version = "=0.1.0" }
 tempfile = "=3.23.0"

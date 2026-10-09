@@ -44,3 +44,7 @@ pub mod cli;
 
 #[path = "../adapters/legacy/mod.rs"]
 pub mod legacy;
+
+pub mod evidence;
+#[path = "../adapters/guards/mod.rs"]
+mod guard_adapters;

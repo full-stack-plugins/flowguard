@@ -167,6 +167,29 @@ pub fn prepare_gate(
     policies: BTreeMap<String, EligibilityPolicy>,
     request: GateRequest,
 ) -> Result<PendingGate, TransportDiagnostic> {
+    prepare_with_sources(binding, frozen, None, policies, request)
+}
+/// Opt-in scoped profile: expected source pins must be independently frozen by
+/// the controller. All other native binding fields retain exact equality.
+pub fn prepare_scoped_gate(
+    binding: &ValidatedBinding,
+    frozen: &FrozenObligations,
+    sources: &crate::evidence::ScopedSources,
+    policies: BTreeMap<String, EligibilityPolicy>,
+    request: GateRequest,
+) -> Result<PendingGate, TransportDiagnostic> {
+    sources
+        .validate_for(binding, frozen)
+        .map_err(|_| error("gate.source_profile"))?;
+    prepare_with_sources(binding, frozen, Some(sources), policies, request)
+}
+fn prepare_with_sources(
+    binding: &ValidatedBinding,
+    frozen: &FrozenObligations,
+    sources: Option<&crate::evidence::ScopedSources>,
+    policies: BTreeMap<String, EligibilityPolicy>,
+    request: GateRequest,
+) -> Result<PendingGate, TransportDiagnostic> {
     if frozen.context_digest() != binding.domain_digest()
         || request.action.trim().is_empty()
         || request.action.len() > 128
@@ -188,12 +211,19 @@ pub fn prepare_gate(
     let git_scope = format!("git.scope:{}", binding.candidate_scope_digest());
     required.insert(git_scope.clone());
     observed.insert(git_scope);
+    if let Some(sources) = sources {
+        let anchor = format!("flowguard.sources:{}", sources.digest());
+        required.insert(anchor.clone());
+        observed.insert(anchor);
+    }
     for obligation in frozen.obligations() {
         let scope = obligation_scope(obligation);
         let policy = policies
             .get(&scope)
             .ok_or_else(|| error("gate.policy_missing"))?;
-        if policy.binding != *binding.binding()
+        let expected = crate::guard_adapters::expected_binding(binding.binding(), sources, &scope)
+            .map_err(|_| error("gate.source_profile"))?;
+        if policy.binding != expected
             || policy.action != request.action
             || policy.producer.guard != obligation.guard
             || policy.producer.analyzer_version != obligation.analyzer_version

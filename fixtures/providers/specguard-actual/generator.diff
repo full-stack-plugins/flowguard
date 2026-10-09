@@ -1,0 +1,11 @@
+--- TG verified generator
++++ FG generator
+@@ -14,7 +14,7 @@
+  let snapshot=freeze(root,&inventory,CandidateBinding{candidate_oid:oid.clone(),base_oid:oid.clone(),object_format:"sha1".into()}).unwrap();let status=std::process::Command::new("git").arg("-C").arg(root).args(["status","--porcelain"]).output().unwrap();assert!(status.status.success() && status.stdout.is_empty());
+  let graph=build_graph(specguard::parser::parse(&snapshot));assert!(graph.complete());
+  let scope:BTreeSet<_>=graph.parsed.requirements.iter().map(|r|r.key.clone()).collect();
+- let b=ApprovedBaseline{api_version:Version::V1,repository:"fixture:testguard-import".into(),scope,source_revision:oid,source_digest:graph.parsed.snapshot_digest.clone(),graph_digest:digest(&graph),policy_digest:format!("sha256:{}","a".repeat(64)),approval_ref:"fixture:approval-testguard".into(),effective_from:10,expires_at:100,state:BaselineState::Approved,graph};
++ let b=ApprovedBaseline{api_version:Version::V1,repository:"fixture:flowguard-import".into(),scope,source_revision:oid,source_digest:graph.parsed.snapshot_digest.clone(),graph_digest:digest(&graph),policy_digest:format!("sha256:{}","a".repeat(64)),approval_ref:"fixture:approval-flowguard".into(),effective_from:10,expires_at:100,state:BaselineState::Approved,graph};
+  let approved=authenticate(&b,&Fixture,Profile::Fixture,50).unwrap();
+  let e=export_obligations(&b.graph,&approved,&b.scope,&b.source_digest).unwrap();assert_eq!(e.obligations.len(),3);assert!(e.complete);
+  std::fs::create_dir_all(out).unwrap();

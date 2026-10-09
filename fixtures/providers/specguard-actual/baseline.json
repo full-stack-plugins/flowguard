@@ -1,0 +1,108 @@
+{
+  "apiVersion": "specguard.domain/v1alpha1",
+  "repository": "fixture:flowguard-import",
+  "scope": [
+    {
+      "namespace": "demo",
+      "id": "R1"
+    },
+    {
+      "namespace": "demo",
+      "id": "R2"
+    }
+  ],
+  "sourceRevision": "8df2938fd39ad94c098691912ab1e2c9b0aff0b7",
+  "sourceDigest": "sha256:2b2a13bb45c17cad31380c581eb6265e43b32a3d23628c5ca388aadfcc64b4bd",
+  "graphDigest": "sha256:77169e1abab44be5a97b62cf00754d97411c6eab8734607085eb603082392c19",
+  "policyDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "approvalRef": "fixture:approval-flowguard",
+  "effectiveFrom": 10,
+  "expiresAt": 100,
+  "state": "approved",
+  "graph": {
+    "parsed": {
+      "apiVersion": "specguard.domain/v1alpha1",
+      "snapshotDigest": "sha256:2b2a13bb45c17cad31380c581eb6265e43b32a3d23628c5ca388aadfcc64b4bd",
+      "candidateOid": "8df2938fd39ad94c098691912ab1e2c9b0aff0b7",
+      "sources": [
+        {
+          "path": "specs/plan.md",
+          "status": "complete",
+          "reason": "parsed"
+        }
+      ],
+      "requirements": [
+        {
+          "key": {
+            "namespace": "demo",
+            "id": "R1"
+          },
+          "text": "Sign-in works.",
+          "source": {
+            "path": "specs/plan.md",
+            "line": 5
+          }
+        },
+        {
+          "key": {
+            "namespace": "demo",
+            "id": "R2"
+          },
+          "text": "Sign-out works.",
+          "source": {
+            "path": "specs/plan.md",
+            "line": 11
+          }
+        }
+      ],
+      "acceptances": [
+        {
+          "key": {
+            "namespace": "demo",
+            "id": "A1"
+          },
+          "requirement": {
+            "namespace": "demo",
+            "id": "R1"
+          },
+          "text": "Correct password starts a session.",
+          "source": {
+            "path": "specs/plan.md",
+            "line": 7
+          }
+        },
+        {
+          "key": {
+            "namespace": "demo",
+            "id": "A2"
+          },
+          "requirement": {
+            "namespace": "demo",
+            "id": "R1"
+          },
+          "text": "Wrong password does not start a session.",
+          "source": {
+            "path": "specs/plan.md",
+            "line": 9
+          }
+        },
+        {
+          "key": {
+            "namespace": "demo",
+            "id": "A3"
+          },
+          "requirement": {
+            "namespace": "demo",
+            "id": "R2"
+          },
+          "text": "Sign-out ends the session.",
+          "source": {
+            "path": "specs/plan.md",
+            "line": 13
+          }
+        }
+      ],
+      "edges": []
+    }
+  }
+}

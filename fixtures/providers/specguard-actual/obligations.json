@@ -1,0 +1,79 @@
+{
+  "apiVersion": "specguard.domain/v1alpha1",
+  "kind": "TestObligationSet",
+  "baselineDigest": "sha256:9b1a5665b5fe39136cd5f5f014e1c87293b14fd98719bff86bb58f164380ac9f",
+  "sourceDigest": "sha256:2b2a13bb45c17cad31380c581eb6265e43b32a3d23628c5ca388aadfcc64b4bd",
+  "candidateOid": "8df2938fd39ad94c098691912ab1e2c9b0aff0b7",
+  "scope": [
+    {
+      "namespace": "demo",
+      "id": "R1"
+    },
+    {
+      "namespace": "demo",
+      "id": "R2"
+    }
+  ],
+  "sources": [
+    {
+      "path": "specs/plan.md",
+      "status": "complete",
+      "reason": "parsed"
+    }
+  ],
+  "complete": true,
+  "authenticationProfile": "fixture-only",
+  "obligations": [
+    {
+      "id": "obligation:sha256:2beccb963cdb6ab9da6e77fdaa95ce1a0028f1814c98e6c5bf4e2a546262041b",
+      "requirement": {
+        "namespace": "demo",
+        "id": "R2"
+      },
+      "acceptance": {
+        "namespace": "demo",
+        "id": "A3"
+      },
+      "source": {
+        "path": "specs/plan.md",
+        "line": 13
+      },
+      "textDigest": "sha256:8e81c91e1808b7b22318dd1c1b877fc4d1cf49bebd4d64f46630461e6980b03f",
+      "links": []
+    },
+    {
+      "id": "obligation:sha256:6e9cca13173052d5c27ec76b143e06a898c9bdae15a7c3cfbce81401dc6953a2",
+      "requirement": {
+        "namespace": "demo",
+        "id": "R1"
+      },
+      "acceptance": {
+        "namespace": "demo",
+        "id": "A2"
+      },
+      "source": {
+        "path": "specs/plan.md",
+        "line": 9
+      },
+      "textDigest": "sha256:b57002c330f3a99b9c2deba79ec1eb27edb525ead8b4e08d22fd0f31cd3cea1c",
+      "links": []
+    },
+    {
+      "id": "obligation:sha256:e297dc9327c15def0f2a0358aae2910d862cab63c0b3527566f7cc2cb080026a",
+      "requirement": {
+        "namespace": "demo",
+        "id": "R1"
+      },
+      "acceptance": {
+        "namespace": "demo",
+        "id": "A1"
+      },
+      "source": {
+        "path": "specs/plan.md",
+        "line": 7
+      },
+      "textDigest": "sha256:4ac0f815fe191b1a292456a612e7d42326b4660807f1755f4406bd89c86c7f8a",
+      "links": []
+    }
+  ]
+}

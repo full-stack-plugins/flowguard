@@ -1,0 +1,36 @@
+{
+  "profile": "actual-pinned-SpecGuard-parser-export-with-fixture-authority",
+  "producerPins": {
+    "specguard": "e0c75597b81f5c8045902683b71d3bec0b87731d",
+    "gitguard": "95eb3d9e45dab9122f2f025c2b7767a981c61a60",
+    "guardengine": "6527e2a67cb55690330c95dd12b496dd878ed39b"
+  },
+  "command": "cargo run --locked --offline --example generate_flowguard_plan -- /workspace/guard-fg-sg-generator-source OUTPUT",
+  "authority": "fixture-only at now=50; no production authentication",
+  "historicalExportCandidate": "8df2938fd39ad94c098691912ab1e2c9b0aff0b7",
+  "currentWorkflowCandidate": "independently bound by controller; not inferred from historical export",
+  "upstreamGeneratorSha256": "f54407aa97d00624e32661f3df80ba041a7ade213f1d801bd1783e0b713511e0",
+  "expected": {
+    "artifact_digest": "sha256:7b6c1c513e338924a275499b3b05fd7c5358a1bc166fa7e6e08442374df04b08",
+    "baseline_digest": "sha256:9b1a5665b5fe39136cd5f5f014e1c87293b14fd98719bff86bb58f164380ac9f",
+    "source_digest": "sha256:2b2a13bb45c17cad31380c581eb6265e43b32a3d23628c5ca388aadfcc64b4bd",
+    "candidate_oid": "8df2938fd39ad94c098691912ab1e2c9b0aff0b7",
+    "scope": [
+      {
+        "namespace": "demo",
+        "id": "R1"
+      },
+      {
+        "namespace": "demo",
+        "id": "R2"
+      }
+    ]
+  },
+  "sha256": {
+    "source.bundle": "4d17dc4e74c4abefe286c1bf47f1a7561c7aada3f651ae2f80895ae8176b5b04",
+    "source.md": "6886f83d2067c4d9403fef5a7eac68524666a24ea4de57cc2065a366f1c5dd39",
+    "generator.rs": "2c009feb81d06983572815b3a5a07d0bee1ebb73739491ca9d571792ccf6a52a",
+    "baseline.json": "9894ffa74fdc06c67449cc4f92b14d1d367ba615e9b8a4e46922e74a07c7a91f",
+    "obligations.json": "7b6c1c513e338924a275499b3b05fd7c5358a1bc166fa7e6e08442374df04b08"
+  }
+}

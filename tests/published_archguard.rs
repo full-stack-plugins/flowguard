@@ -204,26 +204,6 @@ fn actual_archguard_trusted_refresh_controls_published_flowguard_route() {
         .insert(record.envelope_digest.clone(), record);
     store.append(&run).unwrap();
     store.publish(&run.envelope().run_id, 1).unwrap();
-    let mut route = LocalStageRoute::new_published(
-        &plan,
-        StageState::Accepted,
-        flowguard::digest(b"legacy architecture"),
-        &store,
-    )
-    .unwrap();
-    route.submit().unwrap();
-    route.set_mode(RouteMode::OptIn).unwrap();
-    route
-        .qualify(&run, "stage-review", vec![], &authority, now)
-        .unwrap();
-    assert_eq!(
-        route.consume(&authority, now).unwrap(),
-        StageState::Accepted
-    );
-    authority.enabled = false;
-    assert!(route.consume(&authority, now).is_err());
-    authority.enabled = true;
-    assert!(route.consume(&authority, now).is_ok());
     // Actual native analyzer observes a changed dependency; the stored bundle
     // remains the original immutable commit and cannot pass parity comparison.
     let manifest = f.directory.path().join("app/Cargo.toml");
@@ -237,6 +217,43 @@ fn actual_archguard_trusted_refresh_controls_published_flowguard_route() {
         .analyze(f.directory.path(), "changed native input")
         .unwrap();
     std::fs::write(&manifest, original_manifest).unwrap();
+    let mut route = LocalStageRoute::new_published(
+        &plan,
+        StageState::Accepted,
+        flowguard::digest(b"legacy architecture"),
+        &store,
+    )
+    .unwrap();
+    route.submit().unwrap();
+    for mode in [RouteMode::Advisory, RouteMode::Shadow] {
+        route.set_mode(mode).unwrap();
+        assert!(
+            !route
+                .qualify(&run, "stage-review", vec![], &authority, now)
+                .unwrap()
+        );
+        assert!(route.consume(&authority, now).is_err());
+    }
+    route.set_mode(RouteMode::OptIn).unwrap();
+    let original_native = std::mem::replace(&mut authority.native, mismatch.clone());
+    assert!(
+        route
+            .qualify(&run, "stage-review", vec![], &authority, now)
+            .is_err()
+    );
+    assert!(route.consume(&authority, now).is_err());
+    authority.native = original_native;
+    route
+        .qualify(&run, "stage-review", vec![], &authority, now)
+        .unwrap();
+    assert_eq!(
+        route.consume(&authority, now).unwrap(),
+        StageState::Accepted
+    );
+    authority.enabled = false;
+    assert!(route.consume(&authority, now).is_err());
+    authority.enabled = true;
+    assert!(route.consume(&authority, now).is_ok());
     let original_native = std::mem::replace(&mut authority.native, mismatch);
     assert!(route.consume(&authority, now).is_err());
     authority.native = original_native;
@@ -267,7 +284,7 @@ fn actual_archguard_trusted_refresh_controls_published_flowguard_route() {
             "archguard_envelope_digest": flowguard::digest(&serde_json::to_vec(&bundle.envelope).unwrap()),
             "flowguard_envelope_digest": flowguard::digest(&serde_json::to_vec(run.envelope()).unwrap()),
             "plan_digest": plan.digest(), "trusted_check_each_refresh": true, "same_contract_native_parity": true,
-            "actual_native_mismatch_refused": true, "disabled_adapter_refused": true,
+            "actual_native_mismatch_refused": true, "mismatch_promotion_refused": true, "advisory_shadow_no_transfer": true, "disabled_adapter_refused": true,
             "rollback_reenable_revocation_refused": true, "original_bundle_preserved": true, "history_prefix_preserved": true,
             "host_enforced": false
         })

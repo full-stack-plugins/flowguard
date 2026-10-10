@@ -48,3 +48,9 @@ required approval after rollback/re-enable refuses the retained FlowGuard receip
 The original bundle/history are preserved. This is an explicit local caller
 composition, not a production provider installation or implicit propagation of all
 upstream route modes.
+
+The same actual AG/FG consumer test rejects an unsupported required capability,
+a missing domain artifact and authenticated partial coverage when consuming the
+retained published FlowGuard receipt. It keeps both protected required-scope sets
+and original bundle/baseline bytes unchanged, and verifies baseline recovery between
+each mutation. These are consumer-boundary refusals, not standalone schema checks.

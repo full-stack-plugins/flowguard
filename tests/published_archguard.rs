@@ -250,6 +250,55 @@ fn actual_archguard_trusted_refresh_controls_published_flowguard_route() {
         route.consume(&authority, now).unwrap(),
         StageState::Accepted
     );
+    let frozen_required = run.envelope().coverage.required_scopes.clone();
+    let ag_required = authority.policy.eligibility.required_scopes.clone();
+    authority
+        .policy
+        .required_capabilities
+        .insert("java.semantic-api.unavailable".into());
+    assert!(route.consume(&authority, now).is_err());
+    authority
+        .policy
+        .required_capabilities
+        .remove("java.semantic-api.unavailable");
+    assert!(route.consume(&authority, now).is_ok());
+
+    let bundle_bytes = serde_json::to_vec(bundle).unwrap();
+    let mut missing_domain: EvidenceBundle = serde_json::from_slice(&bundle_bytes).unwrap();
+    missing_domain.domain = None;
+    authority.bundle = &missing_domain;
+    assert!(route.consume(&authority, now).is_err());
+    authority.bundle = bundle;
+    assert!(route.consume(&authority, now).is_ok());
+
+    let mut missing_coverage: EvidenceBundle = serde_json::from_slice(&bundle_bytes).unwrap();
+    let omitted = missing_coverage
+        .envelope
+        .coverage
+        .observed_scopes
+        .pop()
+        .unwrap();
+    missing_coverage
+        .envelope
+        .coverage
+        .missing_scopes
+        .push(omitted);
+    missing_coverage.envelope.coverage.status = guardengine::integration::CoverageStatus::Partial;
+    // Authenticate the exact incomplete observation too: refusal must not rely
+    // merely on an unknown digest or a reduced protected required set.
+    let partial_record = scoped_support::FixtureIssuer::for_envelope(&missing_coverage.envelope).0;
+    authority
+        .records
+        .issuers
+        .insert(partial_record.envelope_digest.clone(), partial_record);
+    authority.bundle = &missing_coverage;
+    assert!(route.consume(&authority, now).is_err());
+    authority.bundle = bundle;
+    assert!(route.consume(&authority, now).is_ok());
+    assert_eq!(run.envelope().coverage.required_scopes, frozen_required);
+    assert_eq!(authority.policy.eligibility.required_scopes, ag_required);
+    assert_eq!(serde_json::to_vec(bundle).unwrap(), bundle_bytes);
+    assert_eq!(original, serde_json::to_vec(&result).unwrap());
     authority.enabled = false;
     assert!(route.consume(&authority, now).is_err());
     authority.enabled = true;
@@ -283,7 +332,7 @@ fn actual_archguard_trusted_refresh_controls_published_flowguard_route() {
             "schema": "flowguard.archguard-local-joint/v1", "authority": "test-only protected caller",
             "archguard_envelope_digest": flowguard::digest(&serde_json::to_vec(&bundle.envelope).unwrap()),
             "flowguard_envelope_digest": flowguard::digest(&serde_json::to_vec(run.envelope()).unwrap()),
-            "plan_digest": plan.digest(), "trusted_check_each_refresh": true, "same_contract_native_parity": true,
+            "plan_digest": plan.digest(), "trusted_check_each_refresh": true, "same_contract_native_parity": true, "unsupported_capability_refused": true, "missing_domain_refused": true, "missing_coverage_refused": true, "frozen_required_set_preserved": true,
             "actual_native_mismatch_refused": true, "mismatch_promotion_refused": true, "advisory_shadow_no_transfer": true, "disabled_adapter_refused": true,
             "rollback_reenable_revocation_refused": true, "original_bundle_preserved": true, "history_prefix_preserved": true,
             "host_enforced": false

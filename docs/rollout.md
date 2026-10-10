@@ -31,3 +31,20 @@ At the 1,024-entry limit, rollback and switches to advisory/shadow still stop co
 ### Published local verification (2026-10-10)
 
 `tests/published_routing.rs` exercises unpublished evidence, transitive withdrawal, fresh prerequisite revocation, changed-plan resubmission and publication, and fail-closed rollback at the history limit. `tests/release_qualified.rs::published_release_routes_four_phases_and_rechecks_every_feature` executes advisory, shadow, opt-in and rollback over two real generated GateRuns appended and published in `MemoryRunStore`; it emits actual plan/envelope digests and immutable route history. This uses explicit local fixture authority and native Git fixture binding, not production authentication. The release regressions also reject missing/swapped features, another store, detached routes and freshly qualified plans outside the frozen release.
+
+### Authority composition boundary
+
+A `QualifiedStage` prerequisite refreshes its publication and authority. It does not
+retain or observe an unrelated `LocalStageRoute` mode. Routed release consumption
+checks the actual feature09 routes supplied to it; arbitrary upstream route rollback
+requires publication withdrawal or a fresh authority refusal to affect dependents.
+
+`tests/published_archguard.rs` demonstrates the latter with actual Git-bound
+`GitCargoEvidence`. Its test-only authority invokes ArchGuard's `check_stage` on
+every specialist producer refresh, under the independently frozen policy and the
+same contract used for the native/enhanced decision comparison. Disabling the
+adapter, actual native analyzer fact mismatch, or revoking the ArchGuard-specific
+required approval after rollback/re-enable refuses the retained FlowGuard receipt.
+The original bundle/history are preserved. This is an explicit local caller
+composition, not a production provider installation or implicit propagation of all
+upstream route modes.

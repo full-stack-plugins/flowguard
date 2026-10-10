@@ -170,3 +170,42 @@ pub fn approve(c: &mut Controller, plan: &ProtectedStagePlan, reference: &str) {
         },
     );
 }
+
+/// Test-only withdrawal using the production frozen-input invalidation API.
+pub fn withdrawal(
+    pending: &PendingGate,
+    node: &StageRecord,
+) -> flowguard::invalidation::Invalidation {
+    use flowguard::invalidation::*;
+    let graph = build_graph(vec![node.clone()], GraphLimits::default()).unwrap();
+    let d = flowguard::digest(b"protected rollout inputs");
+    let context = ContextDigests {
+        source: d.clone(),
+        rules: d.clone(),
+        analyzer: d.clone(),
+        config: d.clone(),
+        coverage: d.clone(),
+        baseline: d.clone(),
+        dependencies: d,
+    };
+    let freeze = |revoked| {
+        FrozenInputs::freeze(
+            &graph,
+            &[NodeInput {
+                node_id: &node.id,
+                gate: pending,
+                generation: 1,
+                context: &context,
+                freshness: Freshness {
+                    observed_at: NOW,
+                    expires_at: NOW + 60,
+                    revoked,
+                    artifacts_available: true,
+                },
+            }],
+            NOW,
+        )
+        .unwrap()
+    };
+    freeze(false).changes(&freeze(true), NOW).unwrap()
+}

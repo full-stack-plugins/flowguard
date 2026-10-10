@@ -82,6 +82,33 @@ impl ReleasePlan {
                 .collect(),
         })
     }
+    /// Consume the actual opted-in feature routes bound to this publication
+    /// store. Rollback, edits and declarations cannot be bypassed by retaining
+    /// an earlier receipt. All published prerequisites and authority are then
+    /// refreshed together by the existing release qualification path.
+    pub fn consume_routed_published(
+        &self,
+        current: &ValidatedBinding,
+        routes: &BTreeMap<String, &crate::local_migration::LocalStageRoute<'_>>,
+        store: &crate::run_store::MemoryRunStore,
+        provider: &dyn AuthorityProvider,
+        now: i64,
+    ) -> Result<(), ReleaseError> {
+        if routes.len() > 64 || !routes.keys().eq(self.features.keys()) {
+            return Err(ReleaseError::Features);
+        }
+        let features = routes
+            .iter()
+            .map(|(feature, route)| {
+                route
+                    .published_release_entry(store)
+                    .map(|entry| (feature.clone(), entry))
+                    .map_err(|_| ReleaseError::Qualification)
+            })
+            .collect::<Result<BTreeMap<_, _>, _>>()?;
+        self.consume_published(current, &features, store, provider, now)
+    }
+
     /// Publication-aware local release qualification; no release execution grant.
     pub fn consume_published(
         &self,

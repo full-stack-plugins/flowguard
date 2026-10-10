@@ -91,3 +91,5 @@
 ## Completion Evidence
 
 执行者逐任务归档固定输入、命令、预期/实际输出与失败项；运行工具和官方 OpenSpec validator 成功后才能分别说明对应验证，不能勾选本计划代替实现。当前所有任务均未完成；本次计划检查不构成 F0–F4 运行验收。
+
+2026-10-10 local 5.6 progress: `LocalStageRoute::new_published` and `ReleasePlan::consume_routed_published` execute advisory/shadow/opt-in/rollback through the existing MemoryRunStore and qualification APIs. Native Git-bound generated/published runs verify fresh authority, transitive withdrawal, exact release prerequisites, changed plans and retained history. Old detached APIs remain compatible. This closes the local routing gap only; the overall 5.6 checkbox remains pending GE-RELEASE/production distribution compatibility. A real old release sample is not a prerequisite for local wiring and no real migration is claimed. Tasks 4.5/5.4 remain pending their authenticated controller/real host inputs.

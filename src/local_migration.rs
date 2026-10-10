@@ -2,6 +2,7 @@
 //! authority ports. No persisted mode file, host controller or approval import.
 use crate::{
     gate::GateRun,
+    run_store::MemoryRunStore,
     stage_qualification::{ProtectedStagePlan, QualificationError, QualifiedStage},
     stage_transition::{StageDeclaration, StageState},
 };
@@ -24,6 +25,7 @@ pub struct HistoryEntry {
 }
 pub struct LocalStageRoute<'a> {
     receipt: Option<QualifiedStage<'a>>,
+    store: Option<&'a MemoryRunStore>,
     plan: &'a ProtectedStagePlan,
     state: StageState,
     mode: RouteMode,
@@ -41,6 +43,7 @@ impl<'a> LocalStageRoute<'a> {
         }
         let mut route = Self {
             receipt: None,
+            store: None,
             plan,
             state: historical_state,
             mode: RouteMode::Advisory,
@@ -62,6 +65,19 @@ impl<'a> LocalStageRoute<'a> {
         route.append("new_workflow_unqualified")?;
         Ok(route)
     }
+    /// Bind this route to the existing publication store. All qualification and
+    /// consumption (including shadow observations) recheck the current run set.
+    pub fn new_published(
+        plan: &'a ProtectedStagePlan,
+        historical_state: StageState,
+        legacy_source_digest: String,
+        store: &'a MemoryRunStore,
+    ) -> Result<Self, QualificationError> {
+        let mut route = Self::new(plan, historical_state, legacy_source_digest)?;
+        route.store = Some(store);
+        Ok(route)
+    }
+
     pub fn state(&self) -> StageState {
         self.state
     }
@@ -110,11 +126,27 @@ impl<'a> LocalStageRoute<'a> {
                     return Err(error);
                 }
             };
+        // Preserve the original detached advisory/shadow call pattern.
+        if self.store.is_none() && self.mode != RouteMode::OptIn {
+            self.append("shadow_qualified_no_transfer")?;
+            return Ok(false);
+        }
+        let state = match self.store {
+            Some(store) => receipt.consume_published(self.plan, store, provider, now),
+            None => receipt.consume(self.plan, provider, now),
+        };
+        let state = match state {
+            Ok(state) => state,
+            Err(error) => {
+                self.append("qualification_refused")?;
+                return Err(error);
+            }
+        };
         if self.mode != RouteMode::OptIn {
             self.append("shadow_qualified_no_transfer")?;
             return Ok(false);
         }
-        self.state = receipt.consume(self.plan, provider, now)?;
+        self.state = state;
         self.append("qualified")?;
         self.receipt = Some(receipt);
         Ok(true)
@@ -143,11 +175,33 @@ impl<'a> LocalStageRoute<'a> {
         if self.mode != RouteMode::OptIn {
             return Err(QualificationError::Transition);
         }
-        self.receipt
+        let receipt = self
+            .receipt
             .as_ref()
-            .ok_or(QualificationError::Transition)?
-            .consume(self.plan, provider, now)
+            .ok_or(QualificationError::Transition)?;
+        match self.store {
+            Some(store) => receipt.consume_published(self.plan, store, provider, now),
+            None => receipt.consume(self.plan, provider, now),
+        }
     }
+    pub(crate) fn published_release_entry(
+        &self,
+        store: &MemoryRunStore,
+    ) -> Result<(&QualifiedStage<'a>, &ProtectedStagePlan), QualificationError> {
+        if self.mode != RouteMode::OptIn {
+            return Err(QualificationError::Transition);
+        }
+        if !self.store.is_some_and(|bound| std::ptr::eq(bound, store)) {
+            return Err(QualificationError::Binding);
+        }
+        Ok((
+            self.receipt
+                .as_ref()
+                .ok_or(QualificationError::Transition)?,
+            self.plan,
+        ))
+    }
+
     fn capacity(&self) -> Result<(), QualificationError> {
         if self.history.len() >= 1024 {
             Err(QualificationError::Budget)

@@ -1,0 +1,13 @@
+[package]
+name = "flowguard"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Agent installation and truthful context for flowguard"
+
+[dependencies]
+guard-install = { path = "../guardengine/crates/guard-install" }
+serde_json = "1"
+guard-evidence = { path = "../guardengine/crates/guard-evidence" }
+

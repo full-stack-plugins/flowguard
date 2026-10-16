@@ -4,7 +4,9 @@
 
 **FlowGuard governs engineering lifecycle, human approvals, dependency ordering, stage evidence and controlled transitions for AI-native development.**
 
-> **Status:** detailed architecture and technical blueprint prepared. This new independent FlowGuard repository has **no released executable runtime yet**. The pre-existing [flowguard-plugin](https://github.com/full-stack-plugins/flowguard-plugin) currently owns the ten-stage semantics and host integrations; it remains authoritative until verified migration.
+> **Status: buildable agent-integration CLI and read-only MCP are available in source.** Professional workflow behavior remains in flowguard-plugin; independent stage gates are not implemented.
+
+Implemented stage artifact prechecks: `stage status`, `stage check`, and MCP `flowguard_stage_check` explicitly adapt the trusted native plugin. Ready artifacts return `requires_approval`, never authorization. See [plugin usage and trust boundary](plugin/README.md).
 
 ## Ten established stages
 
@@ -58,3 +60,22 @@ flowguard gate check --task TASK-104 --action release
 ~~~
 
 Implementation begins by matching the existing Python flowguard_lib behaviors using real ten-stage documents and negative tests. Rule ownership will transfer only after differential testing and real host verification. Planning documents do not imply execution or trusted gating.
+
+## Agent installation and managed instructions
+
+The shared installer provides `install`, `uninstall`, `context`, `instructions render|sync`, `doctor --integration`, and `serve --mcp` for Codex, Claude Code, and Gemini CLI. Each tool renders its own managed block.
+
+```sh
+cargo build --locked
+flowguard install --agents codex,claude,gemini --project /absolute/project --bin-dir /absolute/bin --dry-run
+flowguard context --project /absolute/project
+```
+
+After building, invoke the executable under `target/debug/` (with `.exe` on Windows); short commands above assume PATH is configured. `--bin-dir` copies the current executable; PATH is not changed automatically. Remove `--dry-run` to apply. A sibling `../guardengine/crates/guard-install` source checkout is required.
+
+[Shared design, host mapping, update/uninstall and verification](https://github.com/full-stack-plugins/guardengine/blob/main/docs/agent-installation.md). Configuration success does not prove host loading or quality approval.
+
+## 受信执行证据 / Signed execution evidence
+
+新增只读 evidence check 与 flowguard_evidence_check MCP：显式项目外受信公钥、任务/计划/用例/运行器/有效期策略，重算源码及报告指纹；技术通过仍 requires_approval。完整命令、策略和信任边界参见 [plugin/README.md](plugin/README.md#signed-execution-evidence)。不执行测试、不推进原生阶段。
+

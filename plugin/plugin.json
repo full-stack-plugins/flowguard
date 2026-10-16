@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "flowguard",
+  "version": "0.1.0",
+  "description": "Read-only native stage and signed execution evidence checks with external trust policy and explicit approval boundaries",
+  "license": "Apache-2.0"
+}
+

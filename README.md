@@ -45,6 +45,8 @@ FlowGuard **does not** rerun other Guards' domain rules or create its own accept
 
 ## Documents
 
+The candidate [engineering action Rego package](policy/engineering-gate/v1/README.md) combines frozen obligations, independently verified result references, stage approvals and scoped exceptions. It is a policy artifact for the generic GuardEngine OPA executor; existing stage CLI/MCP remain unchanged. Policy tests do not establish approval authority, protected-host enforcement, or full lifecycle acceptance.
+
 - [Detailed architecture and ten-stage boundary](docs/architecture.md)
 - [Technical design, migration and validation plan](docs/technical-design.md)
 - [Original FlowGuard ten-stage specification](https://github.com/full-stack-plugins/flowguard-plugin/blob/main/docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md)

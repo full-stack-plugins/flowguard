@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "packageId": "flowguard.engineering-gate",
+  "version": "1.0.0",
+  "owner": "flowguard",
+  "entrypoint": "data.flowguard.gate.decision",
+  "files": [
+    {
+      "path": "gate.rego",
+      "digest": "sha256:1d72cecc81abc09b017faf05f31de679200219151872236c95b93f4204d53ef9"
+    }
+  ],
+  "capabilities": {
+    "path": "capabilities.json",
+    "digest": "sha256:3884f80f14f37c793cbadbf9b4c79619229d6cfeb17e66efbb6f9e86d34c92a6"
+  }
+}

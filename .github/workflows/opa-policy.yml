@@ -1,0 +1,101 @@
+name: OPA policy
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: Policy / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      CARGO_TERM_COLOR: always
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: flowguard
+      # 必须先发布 GuardEngine 的公共准备器；缺脚本直接失败，不能回退不校验下载。
+      - uses: actions/checkout@v4
+        with:
+          repository: full-stack-plugins/guardengine
+          ref: main
+          path: guardengine
+      - uses: actions/checkout@v4
+        with:
+          repository: full-stack-plugins/flowguard-plugin
+          ref: main
+          path: flowguard-plugin
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: dtolnay/rust-toolchain@1.85.1
+      - name: Create job-local paths
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          state = Path(os.environ['RUNNER_TEMP']) / 'flowguard-opa-policy'
+          state.mkdir(mode=0o700)
+          for name in ['tmp', 'tools', 'cargo-home', 'target']:
+              (state / name).mkdir(mode=0o700)
+          executable = state / 'tools' / ('opa.exe' if os.name == 'nt' else 'opa')
+          binary = state / 'target/debug' / ('flowguard.exe' if os.name == 'nt' else 'flowguard')
+          values = {
+              'OPA_EXECUTABLE': str(executable),
+              'POLICY_SCRATCH': str(state / 'tmp'),
+              'CARGO_HOME': str(state / 'cargo-home'),
+              'CARGO_TARGET_DIR': str(state / 'target'),
+              'FLOWGUARD_BIN': str(binary),
+              'TEMP': str(state / 'tmp'),
+              'TMP': str(state / 'tmp'),
+              'TMPDIR': str(state / 'tmp'),
+          }
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
+              for key, value in values.items():
+                  output.write(f'{key}={value}\n')
+      - name: Test shared CI preparation boundary
+        run: python -B guardengine/scripts/tests/test_prepare_ci_opa.py
+      - name: Prepare pinned official OPA
+        shell: python
+        run: |
+          import json, os, subprocess, sys
+          from pathlib import Path
+          result = subprocess.run([
+              sys.executable, '-B', 'guardengine/scripts/prepare_ci_opa.py',
+              '--output', os.environ['OPA_EXECUTABLE'],
+          ], check=True, capture_output=True, text=True, timeout=240)
+          metadata = json.loads(result.stdout)
+          assert metadata['version'] == '1.21.2'
+          assert Path(metadata['path']).resolve() == Path(os.environ['OPA_EXECUTABLE']).resolve()
+          print(json.dumps(metadata))
+      - name: Validate production policy and independent decision table
+        shell: python
+        run: |
+          import os, subprocess, sys
+          subprocess.run([
+              sys.executable, '-B', 'flowguard/tests/policy_gate.py',
+              '--opa', os.environ['OPA_EXECUTABLE'], '--scratch', os.environ['POLICY_SCRATCH'],
+          ], check=True)
+          subprocess.run([
+              os.environ['OPA_EXECUTABLE'], 'fmt', '--fail',
+              'flowguard/policy/engineering-gate/v1/gate.rego',
+              'flowguard/policy/engineering-gate/v1/gate_test.rego',
+          ], check=True)
+      - name: Build original CLI
+        working-directory: flowguard
+        run: cargo build --locked
+      - name: Test original evidence interface
+        working-directory: flowguard
+        run: cargo test --locked --all-targets
+      - name: Regress original ten-stage provider and MCP
+        run: python -B flowguard/tests/stage_check.py

@@ -1,0 +1,1109 @@
+{
+  "allow_net": [],
+  "builtins": [
+    {
+      "categories": [
+        "sets"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "the first set",
+            "name": "x",
+            "of": {
+              "type": "any"
+            },
+            "type": "set"
+          },
+          {
+            "description": "the second set",
+            "name": "y",
+            "of": {
+              "type": "any"
+            },
+            "type": "set"
+          }
+        ],
+        "result": {
+          "description": "the intersection of `x` and `y`",
+          "name": "z",
+          "of": {
+            "type": "any"
+          },
+          "type": "set"
+        },
+        "type": "function"
+      },
+      "description": "Returns the intersection of two sets.",
+      "infix": "&",
+      "name": "and"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "the first array",
+            "dynamic": {
+              "type": "any"
+            },
+            "name": "x",
+            "type": "array"
+          },
+          {
+            "description": "the second array",
+            "dynamic": {
+              "type": "any"
+            },
+            "name": "y",
+            "type": "array"
+          }
+        ],
+        "result": {
+          "description": "the concatenation of `x` and `y`",
+          "dynamic": {
+            "type": "any"
+          },
+          "name": "z",
+          "type": "array"
+        },
+        "type": "function"
+      },
+      "description": "Concatenates two arrays.",
+      "name": "array.concat"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "the array to be sliced",
+            "dynamic": {
+              "type": "any"
+            },
+            "name": "arr",
+            "type": "array"
+          },
+          {
+            "description": "the start index of the returned slice; if less than zero, it's clamped to 0",
+            "name": "start",
+            "type": "number"
+          },
+          {
+            "description": "the stop index of the returned slice; if larger than `count(arr)`, it's clamped to `count(arr)`",
+            "name": "stop",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the subslice of `array`, from `start` to `end`, including `arr[start]`, but excluding `arr[end]`",
+          "dynamic": {
+            "type": "any"
+          },
+          "name": "slice",
+          "type": "array"
+        },
+        "type": "function"
+      },
+      "description": "Returns a slice of a given array. If `start` is greater or equal than `stop`, `slice` is `[]`.",
+      "name": "array.slice"
+    },
+    {
+      "categories": [
+        "strings"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "string to use as a delimiter",
+            "name": "delimiter",
+            "type": "string"
+          },
+          {
+            "description": "strings to join",
+            "name": "collection",
+            "of": [
+              {
+                "dynamic": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "of": {
+                  "type": "string"
+                },
+                "type": "set"
+              }
+            ],
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "the joined string",
+          "name": "output",
+          "type": "string"
+        },
+        "type": "function"
+      },
+      "description": "Joins a set or array of strings with a delimiter.",
+      "name": "concat"
+    },
+    {
+      "categories": [
+        "aggregates"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "the set/array/object/string to be counted",
+            "name": "collection",
+            "of": [
+              {
+                "type": "string"
+              },
+              {
+                "dynamic": {
+                  "type": "any"
+                },
+                "type": "array"
+              },
+              {
+                "dynamic": {
+                  "key": {
+                    "type": "any"
+                  },
+                  "value": {
+                    "type": "any"
+                  }
+                },
+                "type": "object"
+              },
+              {
+                "of": {
+                  "type": "any"
+                },
+                "type": "set"
+              }
+            ],
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "the count of elements, key/val pairs, or characters, respectively.",
+          "name": "n",
+          "type": "number"
+        },
+        "type": "function"
+      },
+      "description": "Count takes a collection or string and returns the number of elements (or characters) in it.",
+      "name": "count"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "input string",
+            "name": "x",
+            "type": "string"
+          }
+        ],
+        "result": {
+          "description": "SHA256-hash of `x`",
+          "name": "y",
+          "type": "string"
+        },
+        "type": "function"
+      },
+      "description": "Returns a string representing the input string hashed with the SHA256 function",
+      "name": "crypto.sha256"
+    },
+    {
+      "categories": [
+        "numbers"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "the dividend",
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "description": "the divisor",
+            "name": "y",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the result of `x` divided by `y`",
+          "name": "z",
+          "type": "number"
+        },
+        "type": "function"
+      },
+      "description": "Divides the first number by the second number.",
+      "infix": "/",
+      "name": "div"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "type": "any"
+          },
+          {
+            "type": "any"
+          }
+        ],
+        "result": {
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "=",
+      "name": "eq"
+    },
+    {
+      "categories": [
+        "comparison"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "true if `x` is equal to `y`; false otherwise",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "==",
+      "name": "equal"
+    },
+    {
+      "categories": [
+        "numbers"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "the number to round",
+            "name": "x",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the result of rounding `x` _down_",
+          "name": "y",
+          "type": "number"
+        },
+        "type": "function"
+      },
+      "description": "Rounds the number _down_ to the nearest integer.",
+      "name": "floor"
+    },
+    {
+      "categories": [
+        "comparison"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "true if `x` is greater than `y`; false otherwise",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": ">",
+      "name": "gt"
+    },
+    {
+      "categories": [
+        "comparison"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "true if `x` is greater or equal to `y`; false otherwise",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": ">=",
+      "name": "gte"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "type": "any"
+          },
+          {
+            "type": "any"
+          }
+        ],
+        "result": {
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "in",
+      "name": "internal.member_2"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "type": "any"
+          },
+          {
+            "type": "any"
+          },
+          {
+            "type": "any"
+          }
+        ],
+        "result": {
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "in",
+      "name": "internal.member_3"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is an array, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns `true` if the input value is an array.",
+      "name": "is_array"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is an boolean, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns `true` if the input value is a boolean.",
+      "name": "is_boolean"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is null, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns `true` if the input value is null.",
+      "name": "is_null"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is a number, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns `true` if the input value is a number.",
+      "name": "is_number"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is an object, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns true if the input value is an object",
+      "name": "is_object"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is a set, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns `true` if the input value is a set.",
+      "name": "is_set"
+    },
+    {
+      "categories": [
+        "types"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "input value",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`true` if `x` is a string, `false` otherwise.",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns `true` if the input value is a string.",
+      "name": "is_string"
+    },
+    {
+      "categories": [
+        "encoding"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "the term to serialize",
+            "name": "x",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "the JSON string representation of `x`",
+          "name": "y",
+          "type": "string"
+        },
+        "type": "function"
+      },
+      "description": "Serializes the input term to JSON.",
+      "name": "json.marshal"
+    },
+    {
+      "categories": [
+        "encoding"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "a JSON string",
+            "name": "x",
+            "type": "string"
+          }
+        ],
+        "result": {
+          "description": "the term deserialized from `x`",
+          "name": "y",
+          "type": "any"
+        },
+        "type": "function"
+      },
+      "description": "Deserializes the input string.",
+      "name": "json.unmarshal"
+    },
+    {
+      "categories": [
+        "comparison"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "true if `x` is less than `y`; false otherwise",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "<",
+      "name": "lt"
+    },
+    {
+      "categories": [
+        "comparison"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "true if `x` is less than or equal to `y`; false otherwise",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "<=",
+      "name": "lte"
+    },
+    {
+      "categories": [
+        "sets",
+        "numbers"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "of": [
+              {
+                "type": "number"
+              },
+              {
+                "of": {
+                  "type": "any"
+                },
+                "type": "set"
+              }
+            ],
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "of": [
+              {
+                "type": "number"
+              },
+              {
+                "of": {
+                  "type": "any"
+                },
+                "type": "set"
+              }
+            ],
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "the difference of `x` and `y`",
+          "name": "z",
+          "of": [
+            {
+              "type": "number"
+            },
+            {
+              "of": {
+                "type": "any"
+              },
+              "type": "set"
+            }
+          ],
+          "type": "any"
+        },
+        "type": "function"
+      },
+      "description": "Minus subtracts the second number from the first number or computes the difference between two sets.",
+      "infix": "-",
+      "name": "minus"
+    },
+    {
+      "categories": [
+        "numbers"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the product of `x` and `y`",
+          "name": "z",
+          "type": "number"
+        },
+        "type": "function"
+      },
+      "description": "Multiplies two numbers.",
+      "infix": "*",
+      "name": "mul"
+    },
+    {
+      "categories": [
+        "comparison"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "any"
+          },
+          {
+            "name": "y",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "true if `x` is not equal to `y`; false otherwise",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "!=",
+      "name": "neq"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "the start of the range",
+            "name": "a",
+            "type": "number"
+          },
+          {
+            "description": "the end of the range (inclusive)",
+            "name": "b",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the range between `a` and `b`",
+          "dynamic": {
+            "type": "number"
+          },
+          "name": "range",
+          "type": "array"
+        },
+        "type": "function"
+      },
+      "description": "Returns an array of numbers in the given (inclusive) range. If `a==b`, then `range == [a]`; if `a > b`, then `range` is in descending order.",
+      "name": "numbers.range"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "object to get `key` from",
+            "dynamic": {
+              "key": {
+                "type": "any"
+              },
+              "value": {
+                "type": "any"
+              }
+            },
+            "name": "object",
+            "type": "object"
+          },
+          {
+            "description": "key to lookup in `object`",
+            "name": "key",
+            "type": "any"
+          },
+          {
+            "description": "default to use when lookup fails",
+            "name": "default",
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "`object[key]` if present, otherwise `default`",
+          "name": "value",
+          "type": "any"
+        },
+        "type": "function"
+      },
+      "description": "Returns value of an object's key if present, otherwise a default. If the supplied `key` is an `array`, then `object.get` will search through a nested object or array using each key in turn. For example: `object.get({\"a\": [{ \"b\": true }]}, [\"a\", 0, \"b\"], false)` results in `true`.",
+      "name": "object.get"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "object to get keys from",
+            "dynamic": {
+              "key": {
+                "type": "any"
+              },
+              "value": {
+                "type": "any"
+              }
+            },
+            "name": "object",
+            "type": "object"
+          }
+        ],
+        "result": {
+          "description": "set of `object`'s keys",
+          "name": "value",
+          "of": {
+            "type": "any"
+          },
+          "type": "set"
+        },
+        "type": "function"
+      },
+      "description": "Returns a set of an object's keys. For example: `object.keys({\"a\": 1, \"b\": true, \"c\": \"d\")` results in `{\"a\", \"b\", \"c\"}`.",
+      "name": "object.keys"
+    },
+    {
+      "categories": [
+        "sets"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "of": {
+              "type": "any"
+            },
+            "type": "set"
+          },
+          {
+            "name": "y",
+            "of": {
+              "type": "any"
+            },
+            "type": "set"
+          }
+        ],
+        "result": {
+          "description": "the union of `x` and `y`",
+          "name": "z",
+          "of": {
+            "type": "any"
+          },
+          "type": "set"
+        },
+        "type": "function"
+      },
+      "description": "Returns the union of two sets.",
+      "infix": "|",
+      "name": "or"
+    },
+    {
+      "categories": [
+        "numbers"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the sum of `x` and `y`",
+          "name": "z",
+          "type": "number"
+        },
+        "type": "function"
+      },
+      "description": "Plus adds two numbers together.",
+      "infix": "+",
+      "name": "plus"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "description": "regular expression",
+            "name": "pattern",
+            "type": "string"
+          },
+          {
+            "description": "value to match against `pattern`",
+            "name": "value",
+            "type": "string"
+          }
+        ],
+        "result": {
+          "description": "true if `value` matches `pattern`",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Matches a string against a regular expression.",
+      "name": "regex.match"
+    },
+    {
+      "categories": [
+        "numbers"
+      ],
+      "decl": {
+        "args": [
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          }
+        ],
+        "result": {
+          "description": "the remainder",
+          "name": "z",
+          "type": "number"
+        },
+        "type": "function"
+      },
+      "description": "Returns the remainder for of `x` divided by `y`, for `y != 0`.",
+      "infix": "%",
+      "name": "rem"
+    },
+    {
+      "decl": {
+        "args": [
+          {
+            "of": {
+              "type": "any"
+            },
+            "type": "set"
+          },
+          {
+            "of": {
+              "type": "any"
+            },
+            "type": "set"
+          }
+        ],
+        "result": {
+          "of": {
+            "type": "any"
+          },
+          "type": "set"
+        },
+        "type": "function"
+      },
+      "deprecated": true,
+      "name": "set_diff"
+    },
+    {
+      "categories": [
+        "aggregates"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "the array or set to be sorted",
+            "name": "collection",
+            "of": [
+              {
+                "dynamic": {
+                  "type": "any"
+                },
+                "type": "array"
+              },
+              {
+                "of": {
+                  "type": "any"
+                },
+                "type": "set"
+              }
+            ],
+            "type": "any"
+          }
+        ],
+        "result": {
+          "description": "the sorted array",
+          "dynamic": {
+            "type": "any"
+          },
+          "name": "n",
+          "type": "array"
+        },
+        "type": "function"
+      },
+      "description": "Returns a sorted array.",
+      "name": "sort"
+    },
+    {
+      "categories": [
+        "strings"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "string with formatting verbs",
+            "name": "format",
+            "type": "string"
+          },
+          {
+            "description": "arguments to format into formatting verbs",
+            "dynamic": {
+              "type": "any"
+            },
+            "name": "values",
+            "type": "array"
+          }
+        ],
+        "result": {
+          "description": "`format` formatted by the values in `values`",
+          "name": "output",
+          "type": "string"
+        },
+        "type": "function"
+      },
+      "description": "Returns the given string, formatted.",
+      "name": "sprintf"
+    },
+    {
+      "categories": [
+        "strings"
+      ],
+      "decl": {
+        "args": [
+          {
+            "description": "search string",
+            "name": "search",
+            "type": "string"
+          },
+          {
+            "description": "base string",
+            "name": "base",
+            "type": "string"
+          }
+        ],
+        "result": {
+          "description": "result of the prefix check",
+          "name": "result",
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "description": "Returns true if the search string begins with the base string.",
+      "name": "startswith"
+    }
+  ],
+  "features": [
+    "keywords_in_refs",
+    "rego_v1",
+    "template_strings"
+  ],
+  "future_keywords": [
+    "and",
+    "not",
+    "or"
+  ],
+  "wasm_abi_versions": [
+    {
+      "minor_version": 1,
+      "version": 1
+    },
+    {
+      "minor_version": 2,
+      "version": 1
+    }
+  ]
+}

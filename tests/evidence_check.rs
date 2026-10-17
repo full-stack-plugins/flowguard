@@ -9,6 +9,7 @@ use std::{
 };
 
 struct Fixture {
+    _directory: tempfile::TempDir,
     root: PathBuf,
     project: PathBuf,
     key: PathBuf,
@@ -18,17 +19,26 @@ struct Fixture {
 }
 impl Fixture {
     fn new() -> Self {
-        let root = std::env::var_os("TEMP")
+        Self::at_clock_tick(
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos(),
+        )
+    }
+    fn at_clock_tick(clock_tick: u128) -> Self {
+        let parent = std::env::var_os("TEMP")
             .map(PathBuf::from)
-            .unwrap_or_else(std::env::temp_dir)
-            .join(format!(
-                "flowguard-evidence-{}-{}",
-                std::process::id(),
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_nanos()
-            ));
+            .unwrap_or_else(std::env::temp_dir);
+        // 时间戳只用于可读标签；由原子创建的随机目录提供真正唯一性。
+        let directory = tempfile::Builder::new()
+            .prefix(&format!(
+                "flowguard-evidence-{}-{clock_tick}-",
+                std::process::id()
+            ))
+            .tempdir_in(parent)
+            .unwrap();
+        let root = directory.path().to_path_buf();
         let project = root.join("project");
         fs::create_dir_all(&project).unwrap();
         fs::write(project.join("main.rs"), "fn main() {}\n").unwrap();
@@ -48,6 +58,7 @@ impl Fixture {
         let policy = json!({"task_id":"demo","plan_digest":plan,"required_tests":["accepts"],"runner":"cargo","max_age_seconds":60});
         let payload = json!({"schema_version":"testguard.execution/v1","producer":"testguard","project":project,"snapshot":snapshot_project(&project).unwrap(),"task_id":"demo","plan_digest":plan,"runner":"cargo","executable":{"path":program,"sha256":hash_file(&program).unwrap()},"argv":["test"],"started_at_unix_ms":now-10,"finished_at_unix_ms":now-1,"exit_code":0,"status":"PASS","required_tests":["accepts"],"observed_tests":["accepts"],"artifacts":[{"path":report,"sha256":hash_file(&report).unwrap()}],"execution_verified":true});
         Self {
+            _directory: directory,
             root,
             project,
             key,
@@ -106,10 +117,14 @@ impl Fixture {
         }
     }
 }
-impl Drop for Fixture {
-    fn drop(&mut self) {
-        let _ = fs::remove_dir_all(&self.root);
-    }
+
+#[test]
+fn fixtures_are_unique_even_with_the_same_clock_tick() {
+    let first = Fixture::at_clock_tick(42);
+    let second = Fixture::at_clock_tick(42);
+    assert_ne!(first.root, second.root);
+    assert!(first.private.is_file());
+    assert!(second.private.is_file());
 }
 #[test]
 fn signed_success_is_read_only_and_still_requires_approval_with_mcp_parity() {
